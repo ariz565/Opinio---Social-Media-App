@@ -33,7 +33,7 @@ const mediaItems = [
     url: "https://images.unsplash.com/photo-1498050108023-c5249f4df085",
     size: "2.4 MB",
     dimensions: "1920x1080",
-    uploadedBy: "John Doe",
+    uploadedBy: "Demo Test",
     uploadedAt: "2024-03-15 14:30",
   },
   {

@@ -19,7 +19,7 @@ const activities = [
   {
     id: "1",
     user: {
-      name: "John Doe",
+      name: "Demo Test",
       email: "john@example.com",
       avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
     },

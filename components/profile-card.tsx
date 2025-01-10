@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader } from "./ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { MapPin, Link as LinkIcon, Calendar } from "lucide-react";
 import { QuickEditProfile } from "./profile/quick-edit-profile";
+import Link from "next/link";
 
 export function ProfileCard() {
   const [profileData, setProfileData] = useState({
@@ -35,7 +36,15 @@ export function ProfileCard() {
       <CardContent className="pt-16">
         <div className="flex justify-between">
           <div>
-            <h2 className="text-2xl font-bold">{profileData.name}</h2>
+            <h2 className="text-2xl font-bold">
+              <Link
+                href={`/profile/${profileData.name
+                  .toLowerCase()
+                  .replace(" ", "")}`}
+              >
+                {profileData.name}
+              </Link>
+            </h2>
             <p className="text-muted-foreground">
               @{profileData.name.toLowerCase().replace(" ", "")}
             </p>
@@ -56,7 +65,7 @@ export function ProfileCard() {
           </div>
           <div className="flex items-center gap-2 text-muted-foreground">
             <Calendar className="h-4 w-4" />
-            <span>Joined November 2024</span>
+            <span>Joined January 2025</span>
           </div>
         </div>
         <div className="mt-4 flex gap-4">

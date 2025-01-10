@@ -23,7 +23,7 @@ import { MoreHorizontal, Search } from 'lucide-react';
 const users = [
   {
     id: '1',
-    name: 'John Doe',
+    name: 'Demo Test',
     email: 'john@example.com',
     status: 'Active',
     role: 'User',

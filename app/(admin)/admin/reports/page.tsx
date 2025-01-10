@@ -24,9 +24,9 @@ import { Search, AlertTriangle } from 'lucide-react';
 const reports = [
   {
     id: '1',
-    type: 'Harassment',
+    type: 'Guidelines violation',
     content: 'Inappropriate comments on user profile',
-    reporter: 'John Doe',
+    reporter: 'Demo Test',
     reported: 'User123',
     status: 'Open',
     priority: 'High',

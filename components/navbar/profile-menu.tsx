@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   User,
@@ -9,8 +9,8 @@ import {
   Briefcase,
   LogOut,
   ChevronRight,
-} from 'lucide-react';
-import { Button } from '../ui/button';
+} from "lucide-react";
+import { Button } from "../ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,9 +23,9 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Avatar, AvatarFallback, AvatarImage } from '../ui/avatar';
-import Link from 'next/link';
+} from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import Link from "next/link";
 
 export function ProfileMenu() {
   return (
@@ -45,12 +45,14 @@ export function ProfileMenu() {
             <AvatarFallback>JD</AvatarFallback>
           </Avatar>
           <div>
-            <p className="font-semibold">John Doe</p>
-            <p className="text-sm text-muted-foreground">Full Stack Developer</p>
+            <p className="font-semibold">Demo Test</p>
+            <p className="text-sm text-muted-foreground">
+              Full Stack Developer
+            </p>
           </div>
         </div>
-        <Link href="/profile/johndoe">
-          <Button variant="secondary" className="w-full mx-4 mb-2">
+        <Link href="/profile/demotest">
+          <Button variant="secondary" className="w-72 mx-4 mb-2">
             View Profile
           </Button>
         </Link>

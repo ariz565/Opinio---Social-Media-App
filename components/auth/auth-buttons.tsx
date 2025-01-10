@@ -141,7 +141,7 @@ export function AuthButtons() {
               <Input
                 id="signup-name"
                 {...register("name")}
-                placeholder="John Doe"
+                placeholder="Demo Test"
               />
               {errors.name && (
                 <p className="text-sm text-red-500">

@@ -8,6 +8,12 @@ const STATIC_USERS = [
     avatar: "https://github.com/shadcn.png",
   },
   {
+    username: "demotest",
+    name: "Demo Test",
+    avatar: "https://github.com/shadcn.png",
+  },
+
+  {
     username: "sarahwilson",
     name: "Sarah Wilson",
     avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",

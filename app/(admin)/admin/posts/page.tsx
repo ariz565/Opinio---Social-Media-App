@@ -22,7 +22,7 @@ const posts = [
   {
     id: '1',
     author: {
-      name: 'John Doe',
+      name: 'Demo Test',
       avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e',
     },
     content: 'Just launched our new feature! Check it out! #tech #innovation',

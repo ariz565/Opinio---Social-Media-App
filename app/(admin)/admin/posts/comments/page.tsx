@@ -24,7 +24,7 @@ const comments = [
   {
     id: "1",
     content: "Great article! Very informative.",
-    author: "John Doe",
+    author: "Demo Test",
     post: "Getting Started with Web Development",
     likes: 15,
     reports: 0,
