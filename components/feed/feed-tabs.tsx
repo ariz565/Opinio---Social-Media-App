@@ -27,8 +27,8 @@ export function FeedTabs() {
         <div className="flex items-center justify-between">
           <Tabs
             value={activeTab}
-            onValueChange={(value: "following" | "explore") =>
-              setActiveTab(value)
+            onValueChange={(value: string) =>
+              setActiveTab(value as "following" | "explore")
             }
             className="w-full"
           >
