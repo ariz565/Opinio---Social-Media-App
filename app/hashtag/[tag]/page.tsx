@@ -71,14 +71,14 @@ export default function HashtagPage() {
 }
 
 // Static params for testing
-export async function generateStaticParams() {
-  const tags = [
-    "WebDevelopment",
-    "ArtificialIntelligence",
-    "Innovation",
-    "Technology",
-    "Programming",
-  ];
+// export async function generateStaticParams() {
+//   const tags = [
+//     "WebDevelopment",
+//     "ArtificialIntelligence",
+//     "Innovation",
+//     "Technology",
+//     "Programming",
+//   ];
 
-  return tags.map((tag) => ({ tag }));
-}
+//   return tags.map((tag) => ({ tag }));
+// }
