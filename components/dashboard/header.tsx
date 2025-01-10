@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-export function Header() {
+export function AdminHeader() {
   const { setTheme } = useTheme();
 
   return (

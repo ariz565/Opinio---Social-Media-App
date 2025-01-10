@@ -26,40 +26,40 @@ import {
 const navigation = [
   {
     name: "Dashboard",
-    href: "/",
+    href: "/admin/dashboard",
     icon: LayoutDashboard,
   },
   {
     name: "User Management",
     icon: Users,
     submenu: [
-      { name: "All Users", href: "/users" },
-      { name: "Roles & Permissions", href: "/users/roles" },
-      { name: "User Activity", href: "/users/activity" },
+      { name: "All Users", href: "/admin/users" },
+      { name: "Roles & Permissions", href: "/admin/users/roles" },
+      { name: "User Activity", href: "/admin/users/activity" },
     ],
   },
   {
     name: "Content",
     icon: MessageSquare,
     submenu: [
-      { name: "All Posts", href: "/posts" },
-      { name: "Comments", href: "/posts/comments" },
-      { name: "Media Library", href: "/posts/media" },
+      { name: "All Posts", href: "/admin/posts" },
+      { name: "Comments", href: "/admin/posts/comments" },
+      { name: "Media Library", href: "/admin/posts/media" },
     ],
   },
   {
     name: "Analytics",
-    href: "/analytics",
+    href: "/admin/analytics",
     icon: BarChart3,
   },
   {
     name: "Reports",
-    href: "/reports",
+    href: "/admin/reports",
     icon: Flag,
   },
   {
     name: "Settings",
-    href: "/settings",
+    href: "/admin/settings",
     icon: Settings,
   },
 ];
