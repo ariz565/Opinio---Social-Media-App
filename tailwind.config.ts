@@ -31,12 +31,12 @@ const config: Config = {
           foreground: 'hsl(var(--popover-foreground))',
         },
         primary: {
-          DEFAULT: 'hsl(var(--primary))',
-          foreground: 'hsl(var(--primary-foreground))',
+          DEFAULT: 'hsl(210, 100%, 50%)', // Bright blue
+          foreground: 'hsl(0, 0%, 100%)', // White
         },
         secondary: {
-          DEFAULT: 'hsl(var(--secondary))',
-          foreground: 'hsl(var(--secondary-foreground))',
+          DEFAULT: 'hsl(270, 50%, 60%)', // Soft purple
+          foreground: 'hsl(0, 0%, 100%)', // White
         },
         muted: {
           DEFAULT: 'hsl(var(--muted))',

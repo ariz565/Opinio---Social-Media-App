@@ -14,6 +14,7 @@ export async function generateStaticParams() {
 import { HashtagClientPage } from "./topic-page";
 
 // Main server component
-export default function HashtagPage({ params }: { params: { tag: string } }) {
+export default async function HashtagPage(props: { params: Promise<{ tag: string }> }) {
+  const params = await props.params;
   return <HashtagClientPage tag={params.tag} />;
 }

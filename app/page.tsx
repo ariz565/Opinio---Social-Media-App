@@ -1,11 +1,11 @@
 // import { InfiniteFeed } from "@/components/feed/infinite-feed";
-import { PagesSection } from "@/components/pages-section";
-import { ProfileCard } from "@/components/profile-card";
-import { TrendingCard } from "@/components/trending-card";
-import { PeopleYouMayKnow } from "@/components/people-you-may-know";
+import { PagesSection } from "@/components/sidebar/left-sidebar.tsx/pages-section";
+import { ProfileCard } from "@/components/sidebar/left-sidebar.tsx/profile-card";
+import { TrendingCard } from "@/components/sidebar/right-sidebar.tsx/trending-card";
+import { PeopleYouMayKnow } from "@/components/sidebar/right-sidebar.tsx/people-you-may-know";
 import { ChatSystem } from "@/components/chat/chat-system";
 import { FeedTabs } from "@/components/feed/feed-tabs";
-import { Footer } from "@/components/footer";
+import { Footer } from "@/components/footer/footer";
 
 export default function Home() {
   return (

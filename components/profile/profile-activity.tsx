@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/card";
 import { Button } from "../ui/button";
-import { PostCard } from "../post-card";
+import { PostCard } from "../posts/post-card";
 import { Plus } from "lucide-react";
 
 interface ProfileActivityProps {

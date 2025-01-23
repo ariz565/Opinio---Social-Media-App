@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PostCard } from "@/components/post-card";
+import { PostCard } from "@/components/posts/post-card";
+import { ProfileCard } from "@/components/sidebar/left-sidebar.tsx/profile-card";
+import { PagesSection } from "@/components/sidebar/left-sidebar.tsx/pages-section";
+import { TrendingCard } from "@/components/sidebar/right-sidebar.tsx/trending-card";
+import { ChatSystem } from "@/components/chat/chat-system";
+import { Footer } from "@/components/footer/footer";
 
 const posts = [
   {
@@ -55,18 +60,52 @@ export function HashtagClientPage({ tag }: { tag: string }) {
   }, [tag]);
 
   return (
-    <div className="space-y-4">
-      <div className="border-b pb-4">
-        <h1 className="text-3xl font-bold">#{tag}</h1>
-        <p className="text-muted-foreground">
-          {filteredPosts.length} post{filteredPosts.length !== 1 ? "s" : ""}
-        </p>
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-4 py-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
+          {/* Left Sidebar */}
+          <div className="md:col-span-1">
+            <div className="sticky top-6 space-y-6">
+              <ProfileCard />
+              {/* <PagesSection /> */}
+            </div>
+          </div>
+
+          {/* Main Content - Hashtag Posts */}
+          <div className="md:col-span-2">
+            <div className="space-y-4">
+              <div className="border-b pb-4">
+                <h1 className="text-3xl font-bold">#{tag}</h1>
+                <p className="text-muted-foreground">
+                  {filteredPosts.length} post
+                  {filteredPosts.length !== 1 ? "s" : ""}
+                </p>
+              </div>
+              {filteredPosts.length > 0 ? (
+                filteredPosts.map((post) => (
+                  <PostCard key={post.id} {...post} />
+                ))
+              ) : (
+                <p className="text-muted-foreground">
+                  No posts found for #{tag}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Right Sidebar */}
+          <div className="hidden lg:col-span-1 lg:block">
+            <div className="sticky top-6 space-y-6">
+              <TrendingCard />
+              <ChatSystem />
+              {/* Footer */}
+              <div className="mt-8">
+                <Footer />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-      {filteredPosts.length > 0 ? (
-        filteredPosts.map((post) => <PostCard key={post.id} {...post} />)
-      ) : (
-        <p className="text-muted-foreground">No posts found for #{tag}</p>
-      )}
     </div>
   );
 }

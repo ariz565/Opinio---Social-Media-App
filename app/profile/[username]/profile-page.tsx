@@ -5,7 +5,7 @@ import { ProfileHeader } from "@/components/profile/profile-header";
 import { ProfileTabs } from "@/components/profile/profile-tabs";
 import { ProfileAbout } from "@/components/profile/profile-about";
 import { ProfileConnections } from "@/components/profile/profile-connections";
-import { PeopleYouMayKnow } from "@/components/people-you-may-know";
+import { PeopleYouMayKnow } from "@/components/sidebar/right-sidebar.tsx/people-you-may-know";
 import { ProfileAnalytics } from "@/components/profile/profile-analytics";
 import { ProfileResources } from "@/components/profile/profile-resources";
 import { ProfileActivity } from "@/components/profile/profile-activity";

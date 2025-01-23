@@ -26,7 +26,8 @@ export function generateStaticParams() {
   }));
 }
 
-export default function Page({ params }: { params: { username: string } }) {
+export default async function Page(props: { params: Promise<{ username: string }> }) {
+  const params = await props.params;
   const userData = getUserData(params.username);
   return <ProfilePage username={params.username} initialData={userData} />;
 }

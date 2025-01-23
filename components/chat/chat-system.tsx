@@ -1,39 +1,48 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { MessageSquare, ChevronUp, X, Maximize2, Minimize2, MoreVertical } from 'lucide-react';
-import { Button } from '../ui/button';
-import { ChatUserList } from './chat-user-list';
-import { ScrollArea } from '../ui/scroll-area';
+import { useState } from "react";
+import {
+  MessageSquare,
+  ChevronUp,
+  X,
+  Maximize2,
+  Minimize2,
+  MoreVertical,
+} from "lucide-react";
+import { Button } from "../ui/button";
+import { ChatUserList } from "./chat-user-list";
+import { ScrollArea } from "../ui/scroll-area";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from '../ui/dropdown-menu';
-import { Switch } from '../ui/switch';
-import { Label } from '../ui/label';
+} from "../ui/dropdown-menu";
+import { Switch } from "../ui/switch";
+import { Label } from "../ui/label";
 
 export function ChatSystem() {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
-  const [onlineStatus, setOnlineStatus] = useState<'online' | 'away' | 'offline'>('online');
+  const [onlineStatus, setOnlineStatus] = useState<
+    "online" | "away" | "offline"
+  >("online");
   const [mutedUsers, setMutedUsers] = useState<string[]>([]);
   const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
   const toggleMuteUser = (userId: string) => {
-    setMutedUsers(prev =>
+    setMutedUsers((prev) =>
       prev.includes(userId)
-        ? prev.filter(id => id !== userId)
+        ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
   };
 
   const toggleBlockUser = (userId: string) => {
-    setBlockedUsers(prev =>
+    setBlockedUsers((prev) =>
       prev.includes(userId)
-        ? prev.filter(id => id !== userId)
+        ? prev.filter((id) => id !== userId)
         : [...prev, userId]
     );
   };
@@ -58,8 +67,11 @@ export function ChatSystem() {
                         <Label htmlFor="online-status">Online Status</Label>
                         <select
                           id="online-status"
+                          aria-label="Online Status"
                           value={onlineStatus}
-                          onChange={(e) => setOnlineStatus(e.target.value as any)}
+                          onChange={(e) =>
+                            setOnlineStatus(e.target.value as any)
+                          }
                           className="ml-auto"
                         >
                           <option value="online">Online</option>
@@ -69,15 +81,9 @@ export function ChatSystem() {
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      Mute all notifications
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      Message requests
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      Archived chats
-                    </DropdownMenuItem>
+                    <DropdownMenuItem>Mute all notifications</DropdownMenuItem>
+                    <DropdownMenuItem>Message requests</DropdownMenuItem>
+                    <DropdownMenuItem>Archived chats</DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <Button
@@ -116,9 +122,13 @@ export function ChatSystem() {
             setIsMinimized(false);
           }}
         >
-          <MessageSquare className="h-4 w-4" />
+          <MessageSquare className="h-4 w-[26px]" />
           Messages
-          <ChevronUp className={`h-4 w-4 transform transition-transform ${isOpen && !isMinimized ? 'rotate-180' : ''}`} />
+          <ChevronUp
+            className={`h-4 w-4 transform transition-transform ${
+              isOpen && !isMinimized ? "rotate-180" : ""
+            }`}
+          />
         </Button>
       </div>
     </div>

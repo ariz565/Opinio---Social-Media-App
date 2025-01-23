@@ -1,28 +1,35 @@
-'use client';
+"use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
-import { Button } from './ui/button';
-import { Plus, Users } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from "../../ui/card";
+import { Button } from "../../ui/button";
+import { Plus, Users } from "lucide-react";
+import { CreatePage } from "../../pages/create-page";
 
 const suggestedPages = [
   {
-    name: 'Tech Enthusiasts',
-    members: '45.2K members',
-    image: 'https://images.unsplash.com/photo-1518770660439-4636190af475',
+    name: "Tech Enthusiasts",
+    members: "45.2K members",
+    image: "https://images.unsplash.com/photo-1518770660439-4636190af475",
   },
   {
-    name: 'Digital Artists',
-    members: '28.9K members',
-    image: 'https://images.unsplash.com/photo-1501084817091-a4f3d1d19e07',
+    name: "Digital Artists",
+    members: "28.9K members",
+    image: "https://images.unsplash.com/photo-1501084817091-a4f3d1d19e07",
   },
   {
-    name: 'Startup Hub',
-    members: '15.7K members',
-    image: 'https://images.unsplash.com/photo-1552664730-d307ca884978',
+    name: "Startup Hub",
+    members: "15.7K members",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978",
   },
 ];
 
 export function PagesSection() {
+  const handleCreatePage = (pageData: any) => {
+    // Handle the new page data here
+    console.log("New page created:", pageData);
+    // You can add API call here to save the page
+    // You can also update the suggestedPages list if needed
+  };
   return (
     <div className="space-y-6">
       <Card>
@@ -32,10 +39,11 @@ export function PagesSection() {
               <Users className="h-5 w-5" />
               Pages You Might Like
             </span>
-            <Button variant="outline" size="sm">
+            {/* <Button variant="outline" size="sm">
               <Plus className="h-4 w-4 mr-2" />
               Create Page
-            </Button>
+            </Button> */}
+            <CreatePage onCreatePage={handleCreatePage} />
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">

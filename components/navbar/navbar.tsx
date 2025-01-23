@@ -1,18 +1,19 @@
 "use client";
 
-import { Bell, Home, MessageSquare, Moon, Search, Sun } from "lucide-react";
-import { Button } from "./ui/button";
+import { Bell, MessageSquare, Moon, Search, Sun } from "lucide-react";
+import { Button } from "../ui/button";
 import { useTheme } from "next-themes";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
-import { Input } from "./ui/input";
+} from "../ui/dropdown-menu";
+import { Input } from "../ui/input";
 import Link from "next/link";
-import { ProfileMenu } from "./navbar/profile-menu";
-import { SearchBar } from "./search/search-bar";
+import { ProfileMenu } from "./profile-menu";
+import { SearchBar } from "../search/search-bar";
+import Image from "next/image"; // Import the Image component
 
 export default function Navbar() {
   const { setTheme } = useTheme();
@@ -21,8 +22,14 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="flex h-16 items-center px-4 max-w-7xl mx-auto">
         <Link href="/" className="flex items-center gap-2 font-bold text-xl">
-          <Home className="h-6 w-6" />
-          <span>Gulf Return</span>
+          {/* Replace the Home icon and Gulf Return text with the logo */}
+          <Image
+            src="https://raw.githubusercontent.com/ariz565/Learning---AI-ML/refs/heads/main/gulf_eturn_logo-removebg-preview.png?token=GHSAT0AAAAAACPVIOCEQFX44NXCYI4FP3FEZ4SS5DQ"
+            alt="Gulf Return Logo"
+            width={32}
+            height={32}
+            className="h-20 w-20" // Adjust the size as needed
+          />
         </Link>
 
         <div className="flex items-center gap-4 ml-auto">

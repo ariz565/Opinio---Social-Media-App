@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useInView } from "react-intersection-observer";
 import { Loader2 } from "lucide-react";
-import { PostCard } from "../post-card";
+import { PostCard } from "../posts/post-card";
 
 interface Post {
   id: string;

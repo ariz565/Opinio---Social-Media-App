@@ -1,7 +1,7 @@
 "use client";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../ui/tabs";
-import { PostCard } from "../post-card";
+import { PostCard } from "../posts/post-card";
 import { ScrollArea } from "../ui/scroll-area";
 
 interface ProfileTabsProps {
