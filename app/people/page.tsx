@@ -44,7 +44,7 @@ export default function PeoplePage() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
           {/* Left Sidebar */}
           <div className="md:col-span-1">
-            <div className="sticky top-6 space-y-6">
+            <div className="space-y-6">
               <ProfileCard />
               {/* <PagesSection /> */}
             </div>
@@ -92,7 +92,7 @@ export default function PeoplePage() {
 
           {/* Right Sidebar */}
           <div className="hidden lg:col-span-1 lg:block">
-            <div className="sticky top-6 space-y-6">
+            <div className="space-y-6">
               <TrendingCard />
               <ChatSystem />
               <div className="mt-8">

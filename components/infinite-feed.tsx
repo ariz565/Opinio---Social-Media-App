@@ -1,109 +1,348 @@
-// "use client";
+"use client";
 
-// import { useEffect, useState } from "react";
-// import { useInView } from "react-intersection-observer";
-// import { Loader2 } from "lucide-react";
-// import { PostCard } from "./post-card";
-// import { CreatePost } from "./posts/create-post";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
+import { PostCard } from "@/components/post-card";
+import { FeedSkeleton } from "@/components/ui/loading-skeletons";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, RefreshCw } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { postsAPI, Post } from "@/lib/api";
 
-// interface Post {
-//   id: string;
-//   author: {
-//     name: string;
-//     image: string;
-//     username: string;
-//   };
-//   content: string;
-//   image?: string;
-//   likes: number;
-//   comments: number;
-//   timestamp: string;
-// }
+interface FeedResponse {
+  posts: Post[];
+  has_next: boolean;
+  page: number;
+}
 
-// const POSTS_PER_PAGE = 5;
+interface InfiniteFeedProps {
+  feedType: "following" | "explore" | "trending";
+  refreshTrigger?: number;
+  userId?: string;
+}
 
-// const SAMPLE_IMAGES = [
-//   "https://images.unsplash.com/photo-1501504905252-473c47e087f8",
-//   "https://images.unsplash.com/photo-1516321497487-e288fb19713f",
-//   "https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2",
-//   "https://images.unsplash.com/photo-1522202176988-66273c2fd55f",
-//   "https://images.unsplash.com/photo-1520333789090-1afc82db536a",
-// ];
+export const InfiniteFeed = ({
+  feedType,
+  refreshTrigger = 0,
+  userId,
+}: InfiniteFeedProps) => {
+  const [posts, setPosts] = useState<Post[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
 
-// const SAMPLE_AVATARS = [
-//   "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-//   "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
-//   "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
-//   "https://images.unsplash.com/photo-1527980965255-d3b416303d12",
-//   "https://images.unsplash.com/photo-1544005313-94ddf0286df2",
-// ];
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const retryCountRef = useRef(0);
+  const maxRetries = 3;
 
-// export function InfiniteFeed() {
-//   const [posts, setPosts] = useState<Post[]>([]);
-//   const [page, setPage] = useState(1);
-//   const [loading, setLoading] = useState(false);
-//   const [hasMore, setHasMore] = useState(true);
-//   const { ref, inView } = useInView();
+  // Fetch posts function
+  const fetchPosts = useCallback(
+    async (pageNum: number, isInitial = false) => {
+      try {
+        // Cancel previous request
+        if (abortControllerRef.current) {
+          abortControllerRef.current.abort();
+        }
 
-//   const fetchPosts = async () => {
-//     if (!hasMore || loading) return;
+        const controller = new AbortController();
+        abortControllerRef.current = controller;
 
-//     setLoading(true);
-//     // Simulate API call
-//     await new Promise((resolve) => setTimeout(resolve, 1000));
+        let response;
+        if (feedType === "following") {
+          response = await postsAPI.getFeed(pageNum, 20);
+        } else if (feedType === "trending") {
+          response = await postsAPI.getTrendingPosts(pageNum, 20, 24); // 24 hours for trending
+        } else {
+          response = await postsAPI.getExplorePosts(pageNum, 20);
+        }
+        console.log(`🔍 Feed response for ${feedType}:`, response);
 
-//     const newPosts: Post[] = Array.from({ length: POSTS_PER_PAGE }, (_, i) => ({
-//       id: `${page}-${i}`,
-//       author: {
-//         name: `User ${posts.length + i + 1}`,
-//         image:
-//           SAMPLE_AVATARS[Math.floor(Math.random() * SAMPLE_AVATARS.length)],
-//         username: `user${posts.length + i + 1}`,
-//       },
-//       content: `This is post number ${
-//         posts.length + i + 1
-//       }. Here's some interesting content about technology, innovation, and the future of web development. #tech #innovation #webdev`,
-//       image:
-//         Math.random() > 0.5
-//           ? SAMPLE_IMAGES[Math.floor(Math.random() * SAMPLE_IMAGES.length)]
-//           : undefined,
-//       likes: Math.floor(Math.random() * 100),
-//       comments: Math.floor(Math.random() * 20),
-//       timestamp: `${Math.floor(Math.random() * 24)}h ago`,
-//     }));
+        setPosts((prevPosts) => {
+          if (isInitial) {
+            return response.posts || response.items || [];
+          }
+          // Avoid duplicates
+          const existingIds = new Set(prevPosts.map((p) => p.id));
+          const newPosts = (response.posts || response.items || []).filter(
+            (p) => !existingIds.has(p.id)
+          );
+          return [...prevPosts, ...newPosts];
+        });
 
-//     setPosts((prev) => [...prev, ...newPosts]);
-//     setPage((prev) => prev + 1);
-//     setLoading(false);
+        setHasMore(response.has_next || false);
+        setPage(response.page + 1);
+        setError(null);
+        retryCountRef.current = 0;
+      } catch (err: any) {
+        if (err.name === "AbortError") {
+          return; // Request was cancelled, ignore
+        }
 
-//     // Simulate reaching the end of available posts
-//     if (page > 4) {
-//       setHasMore(false);
-//     }
-//   };
+        console.error(`Error fetching ${feedType} posts:`, err);
+        setError(err.message || `Failed to load ${feedType} posts`);
 
-//   useEffect(() => {
-//     if (inView && hasMore) {
-//       fetchPosts();
-//     }
-//   }, [inView]);
+        // Retry logic for network errors
+        if (retryCountRef.current < maxRetries && isInitial) {
+          retryCountRef.current++;
+          setTimeout(() => {
+            fetchPosts(pageNum, isInitial);
+          }, 1000 * retryCountRef.current);
+        }
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+      }
+    },
+    [feedType]
+  );
 
-//   return (
-//     <div className="space-y-0">
-//       <CreatePost />
-//       {posts.map((post) => (
-//         <PostCard key={post.id} {...post} />
-//       ))}
-//       {hasMore && (
-//         <div ref={ref} className="flex justify-center p-4">
-//           {loading && <Loader2 className="h-6 w-6 animate-spin" />}
-//         </div>
-//       )}
-//       {!hasMore && posts.length > 0 && (
-//         <div className="text-center p-4 text-muted-foreground">
-//           No more posts to load
-//         </div>
-//       )}
-//     </div>
-//   );
-// }
+  // Initial load and refresh effect
+  useEffect(() => {
+    setLoading(true);
+    setPosts([]);
+    setPage(1);
+    setHasMore(true);
+    setError(null);
+    fetchPosts(1, true);
+  }, [fetchPosts, refreshTrigger]);
+
+  // Load more posts
+  const loadMore = useCallback(() => {
+    if (!loadingMore && hasMore && !error) {
+      setLoadingMore(true);
+      fetchPosts(page);
+    }
+  }, [loadingMore, hasMore, error, page, fetchPosts]);
+
+  // Intersection Observer for infinite scroll
+  const lastPostRef = useCallback(
+    (node: HTMLDivElement | null) => {
+      if (loading || loadingMore) return;
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (entries[0].isIntersecting && hasMore) {
+            loadMore();
+          }
+        },
+        { threshold: 0.1 }
+      );
+
+      if (node) observer.observe(node);
+
+      return () => {
+        if (node) observer.unobserve(node);
+      };
+    },
+    [loading, loadingMore, hasMore, loadMore]
+  );
+
+  // Handle post interactions with optimistic updates
+  const handleLike = useCallback(async (postId: string) => {
+    // Optimistic update
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? {
+              ...post,
+              is_liked: !post.is_liked,
+              like_count: post.is_liked
+                ? post.like_count - 1
+                : post.like_count + 1,
+            }
+          : post
+      )
+    );
+
+    try {
+      const response = await fetch(`/api/posts/${postId}/like`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+
+      if (!response.ok) {
+        // Revert optimistic update on error
+        setPosts((prevPosts) =>
+          prevPosts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  is_liked: !post.is_liked,
+                  like_count: post.is_liked
+                    ? post.like_count + 1
+                    : post.like_count - 1,
+                }
+              : post
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error liking post:", error);
+      // Revert optimistic update
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                is_liked: !post.is_liked,
+                like_count: post.is_liked
+                  ? post.like_count + 1
+                  : post.like_count - 1,
+              }
+            : post
+        )
+      );
+    }
+  }, []);
+
+  const handleComment = useCallback((postId: string) => {
+    // Update comment count optimistically
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, comment_count: post.comment_count + 1 }
+          : post
+      )
+    );
+  }, []);
+
+  const handleShare = useCallback((postId: string) => {
+    // Update share count optimistically
+    setPosts((prevPosts) =>
+      prevPosts.map((post) =>
+        post.id === postId
+          ? { ...post, share_count: post.share_count + 1 }
+          : post
+      )
+    );
+  }, []);
+
+  // Retry function
+  const handleRetry = useCallback(() => {
+    setError(null);
+    setLoading(true);
+    fetchPosts(1, true);
+  }, [fetchPosts]);
+
+  // Cleanup effect
+  useEffect(() => {
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, []);
+
+  // Loading state
+  if (loading && posts.length === 0) {
+    return <FeedSkeleton />;
+  }
+
+  // Error state
+  if (error && posts.length === 0) {
+    return (
+      <div className="space-y-4">
+        <Alert className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800">
+          <AlertTriangle className="h-4 w-4 text-red-600" />
+          <AlertDescription className="text-red-800 dark:text-red-200">
+            {error}
+          </AlertDescription>
+        </Alert>
+        <div className="text-center">
+          <Button onClick={handleRetry} variant="outline" className="gap-2">
+            <RefreshCw className="w-4 h-4" />
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty state
+  if (!loading && posts.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="w-16 h-16 mx-auto mb-4 bg-gradient-to-br from-teal-100 to-blue-100 dark:from-teal-900 dark:to-blue-900 rounded-full flex items-center justify-center">
+          <RefreshCw className="w-8 h-8 text-teal-600 dark:text-teal-400" />
+        </div>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+          No posts yet
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          {feedType === "following"
+            ? "Follow some people to see their posts here"
+            : "Be the first to share something interesting"}
+        </p>
+        <Button onClick={handleRetry} variant="outline">
+          <RefreshCw className="w-4 h-4 mr-2" />
+          Refresh
+        </Button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {posts.map((post, index) => (
+        <div
+          key={post.id}
+          ref={index === posts.length - 1 ? lastPostRef : null}
+        >
+          <PostCard
+            post={post}
+            onLike={handleLike}
+            onComment={handleComment}
+            onShare={handleShare}
+          />
+        </div>
+      ))}
+
+      {/* Loading more indicator */}
+      {loadingMore && (
+        <div className="py-4">
+          <FeedSkeleton />
+        </div>
+      )}
+
+      {/* End of feed indicator */}
+      {!hasMore && posts.length > 0 && (
+        <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+          <div className="w-12 h-12 mx-auto mb-3 bg-gradient-to-br from-teal-100 to-blue-100 dark:from-teal-900 dark:to-blue-900 rounded-full flex items-center justify-center">
+            ✨
+          </div>
+          <p className="text-sm">You&apos;re all caught up!</p>
+        </div>
+      )}
+
+      {/* Error indicator for load more */}
+      {error && posts.length > 0 && (
+        <div className="text-center py-4">
+          <Alert className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800">
+            <AlertTriangle className="h-4 w-4 text-red-600" />
+            <AlertDescription className="text-red-800 dark:text-red-200">
+              Failed to load more posts
+            </AlertDescription>
+          </Alert>
+          <Button
+            onClick={() => fetchPosts(page)}
+            variant="outline"
+            size="sm"
+            className="mt-2 gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Try Again
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+};

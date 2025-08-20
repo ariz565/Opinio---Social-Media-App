@@ -1,66 +1,52 @@
 import { ProfilePage } from "./profile-page";
 
-// Server Component
-const STATIC_USERS = [
-  {
-    username: "johndoe",
-    name: "John Doe",
-    avatar: "https://github.com/shadcn.png",
-  },
-  {
-    username: "demotest",
-    name: "Demo Test",
-    avatar: "https://github.com/shadcn.png",
-  },
+// Dynamic route - no static generation
+export const dynamic = "force-dynamic";
 
-  {
-    username: "sarahwilson",
-    name: "Sarah Wilson",
-    avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330",
-  },
-] as const;
-
-export function generateStaticParams() {
-  return STATIC_USERS.map((user) => ({
-    username: user.username,
-  }));
-}
-
-export default async function Page(props: { params: Promise<{ username: string }> }) {
+export default async function Page(props: {
+  params: Promise<{ username: string }>;
+}) {
   const params = await props.params;
-  const userData = getUserData(params.username);
+
+  // Fetch user data dynamically instead of using static data
+  const userData = await getUserData(params.username);
+
   return <ProfilePage username={params.username} initialData={userData} />;
 }
 
-function getUserData(username: string) {
-  const user = STATIC_USERS.find((u) => u.username === username);
-
+async function getUserData(username: string) {
+  // Default user data structure
   return {
-    name: user?.name ?? "Unknown User",
+    name: formatDisplayName(username),
     username,
-    bio: "Full-stack developer passionate about creating beautiful and functional web applications.",
-    avatar: user?.avatar ?? "https://github.com/shadcn.png",
+    bio: "Welcome to my profile! Connect with me to see more.",
+    avatar: "https://github.com/shadcn.png",
     banner: "https://images.unsplash.com/photo-1506102383123-c8ef1e872756",
-    followers: 1234,
-    following: 567,
+    followers: 0,
+    following: 0,
     details: {
-      location: "San Francisco, CA",
-      website: "https://johndoe.dev",
-      joinDate: "January 2024",
-      work: [
-        {
-          position: "Senior Software Engineer",
-          company: "Tech Corp",
-          current: true,
-        },
-      ],
-      education: [
-        {
-          school: "University of Technology",
-          degree: "BS Computer Science",
-          graduationYear: "2020",
-        },
-      ],
+      location: "Unknown",
+      website: "",
+      joinDate: "Recently",
+      work: [],
+      education: [],
+    },
+    stats: {
+      posts: 0,
+      followers: 0,
+      following: 0,
+      likes: 0,
     },
   };
+}
+
+function formatDisplayName(username: string): string {
+  // Convert username like 'testuser10' to 'Test User 10'
+  return username
+    .replace(/([a-z])([A-Z])/g, "$1 $2") // Split camelCase
+    .replace(/(\d+)/g, " $1") // Add space before numbers
+    .split(/[\s_-]+/) // Split on spaces, underscores, dashes
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ")
+    .trim();
 }
