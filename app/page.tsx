@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import {
   isAuthenticated,
   getCurrentUser,
@@ -25,6 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
+import { ImageViewer } from "@/components/ui/image-viewer";
 
 // Enhanced Post Card Component for explore feed
 const ExplorePostCard = ({
@@ -34,6 +36,8 @@ const ExplorePostCard = ({
   post: Post;
   onInteractionAttempt: () => void;
 }) => {
+  const [showImageViewer, setShowImageViewer] = useState(false);
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const formatTimeAgo = (dateString: string) => {
     const now = new Date();
     const postDate = new Date(dateString);
@@ -49,15 +53,15 @@ const ExplorePostCard = ({
 
   return (
     <Card className="w-full border-0 border-b border-slate-200 dark:border-gray-800 rounded-none bg-white dark:bg-gray-900 hover:bg-slate-50/50 dark:hover:bg-gray-800/50 transition-colors duration-200">
-      <CardHeader className="pb-3">
+      <CardHeader className="pb-3 px-3 sm:px-6">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <Avatar className="h-11 w-11 ring-2 ring-slate-200 dark:ring-gray-700">
+          <div className="flex items-center space-x-3 min-w-0 flex-1">
+            <Avatar className="h-9 w-9 sm:h-11 sm:w-11 ring-2 ring-slate-200 dark:ring-gray-700 flex-shrink-0">
               <AvatarImage
                 src={post.author?.avatar_url}
                 alt={post.author?.full_name}
               />
-              <AvatarFallback className="bg-gradient-to-br from-teal-500 to-blue-600 text-white font-semibold">
+              <AvatarFallback className="bg-gradient-to-br from-teal-500 to-blue-600 text-white font-semibold text-xs sm:text-sm">
                 {post.author?.full_name
                   ?.split(" ")
                   .map((n) => n[0])
@@ -65,11 +69,11 @@ const ExplorePostCard = ({
                   .toUpperCase() || "U"}
               </AvatarFallback>
             </Avatar>
-            <div>
-              <p className="text-sm font-semibold text-slate-800 dark:text-white">
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-semibold text-slate-800 dark:text-white truncate">
                 {post.author?.full_name || "Anonymous"}
               </p>
-              <p className="text-xs text-slate-500 dark:text-gray-400">
+              <p className="text-xs text-slate-500 dark:text-gray-400 truncate">
                 @{post.author?.username} • {formatTimeAgo(post.created_at)}
               </p>
             </div>
@@ -77,27 +81,27 @@ const ExplorePostCard = ({
           <Button
             variant="ghost"
             size="sm"
-            className="h-8 w-8 p-0 hover:bg-slate-100 dark:hover:bg-gray-800"
+            className="h-8 w-8 p-0 hover:bg-slate-100 dark:hover:bg-gray-800 flex-shrink-0"
           >
             <MoreHorizontal className="h-4 w-4 text-slate-400" />
           </Button>
         </div>
       </CardHeader>
 
-      <CardContent className="pt-0 pb-4">
-        <div className="space-y-4">
+      <CardContent className="pt-0 pb-4 px-3 sm:px-6">
+        <div className="space-y-3 sm:space-y-4">
           {/* Post content */}
-          <p className="text-sm text-slate-700 dark:text-gray-200 leading-relaxed whitespace-pre-wrap">
+          <p className="text-sm text-slate-700 dark:text-gray-200 leading-relaxed whitespace-pre-wrap break-words">
             {post.content}
           </p>
 
           {/* Display hashtags */}
           {post.hashtags && post.hashtags.length > 0 && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1.5 sm:gap-2">
               {post.hashtags.map((tag, index) => (
                 <span
                   key={index}
-                  className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/50 cursor-pointer transition-colors"
+                  className="inline-flex items-center px-2 sm:px-2.5 py-1 rounded-full text-xs font-medium bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300 hover:bg-teal-100 dark:hover:bg-teal-900/50 cursor-pointer transition-colors"
                 >
                   #{tag}
                 </span>
@@ -107,43 +111,135 @@ const ExplorePostCard = ({
 
           {/* Media if exists */}
           {post.media && post.media.length > 0 && (
-            <div className="grid grid-cols-1 gap-2 rounded-xl overflow-hidden">
-              {post.media.map((media, index) => (
-                <img
-                  key={index}
-                  src={media.url}
-                  alt="Post media"
-                  className="w-full h-auto max-h-96 object-cover rounded-xl border border-slate-200 dark:border-gray-700"
-                />
-              ))}
+            <div className="relative">
+              {post.media.length === 1 ? (
+                // Single image - full width
+                <div
+                  className="relative cursor-pointer rounded-xl overflow-hidden border border-slate-200 dark:border-gray-700 hover:opacity-95 transition-opacity"
+                  onClick={() => {
+                    setSelectedImageIndex(0);
+                    setShowImageViewer(true);
+                  }}
+                >
+                  <img
+                    src={post.media[0].url}
+                    alt="Post media"
+                    className="w-full h-auto max-h-96 object-cover"
+                  />
+                </div>
+              ) : post.media.length === 2 ? (
+                // Two images - side by side
+                <div className="grid grid-cols-2 gap-1 rounded-xl overflow-hidden border border-slate-200 dark:border-gray-700">
+                  {post.media.slice(0, 2).map((media, index) => (
+                    <div
+                      key={index}
+                      className="relative cursor-pointer hover:opacity-95 transition-opacity"
+                      onClick={() => {
+                        setSelectedImageIndex(index);
+                        setShowImageViewer(true);
+                      }}
+                    >
+                      <img
+                        src={media.url}
+                        alt={`Post media ${index + 1}`}
+                        className="w-full h-48 sm:h-56 object-cover"
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : post.media.length === 3 ? (
+                // Three images - LinkedIn style (1 large, 2 small)
+                <div className="grid grid-cols-2 gap-1 rounded-xl overflow-hidden border border-slate-200 dark:border-gray-700">
+                  <div
+                    className="relative cursor-pointer hover:opacity-95 transition-opacity"
+                    onClick={() => {
+                      setSelectedImageIndex(0);
+                      setShowImageViewer(true);
+                    }}
+                  >
+                    <img
+                      src={post.media[0].url}
+                      alt="Post media 1"
+                      className="w-full h-64 sm:h-72 object-cover"
+                    />
+                  </div>
+                  <div className="grid grid-rows-2 gap-1">
+                    {post.media.slice(1, 3).map((media, index) => (
+                      <div
+                        key={index + 1}
+                        className="relative cursor-pointer hover:opacity-95 transition-opacity"
+                        onClick={() => {
+                          setSelectedImageIndex(index + 1);
+                          setShowImageViewer(true);
+                        }}
+                      >
+                        <img
+                          src={media.url}
+                          alt={`Post media ${index + 2}`}
+                          className="w-full h-32 sm:h-36 object-cover"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                // Four or more images - 2x2 grid with overlay for additional count
+                <div className="grid grid-cols-2 gap-1 rounded-xl overflow-hidden border border-slate-200 dark:border-gray-700">
+                  {post.media.slice(0, 4).map((media, index) => (
+                    <div
+                      key={index}
+                      className="relative cursor-pointer hover:opacity-95 transition-opacity"
+                      onClick={() => {
+                        setSelectedImageIndex(index);
+                        setShowImageViewer(true);
+                      }}
+                    >
+                      <img
+                        src={media.url}
+                        alt={`Post media ${index + 1}`}
+                        className="w-full h-32 sm:h-40 object-cover"
+                      />
+                      {index === 3 && post.media.length > 4 && (
+                        <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                          <span className="text-white font-semibold text-lg">
+                            +{post.media.length - 4}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           )}
 
           {/* Enhanced Interaction stats */}
           <div className="flex items-center justify-between pt-3 border-t border-slate-100 dark:border-gray-800">
-            <div className="flex items-center space-x-6">
+            <div className="flex items-center space-x-3 sm:space-x-6">
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onInteractionAttempt}
-                className="flex items-center space-x-2 text-slate-500 hover:text-rose-500 dark:text-gray-400 dark:hover:text-rose-400 transition-all duration-200 group"
+                className="flex items-center space-x-1 sm:space-x-2 text-slate-500 hover:text-rose-500 dark:text-gray-400 dark:hover:text-rose-400 transition-all duration-200 group"
               >
-                <div className="p-2 rounded-full group-hover:bg-rose-50 dark:group-hover:bg-rose-900/20 transition-colors">
-                  <Heart className="h-4 w-4" />
+                <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-rose-50 dark:group-hover:bg-rose-900/20 transition-colors">
+                  <Heart className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
-                <span className="text-sm font-medium">{post.like_count}</span>
+                <span className="text-xs sm:text-sm font-medium">
+                  {post.like_count}
+                </span>
               </motion.button>
 
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onInteractionAttempt}
-                className="flex items-center space-x-2 text-slate-500 hover:text-teal-500 dark:text-gray-400 dark:hover:text-teal-400 transition-all duration-200 group"
+                className="flex items-center space-x-1 sm:space-x-2 text-slate-500 hover:text-teal-500 dark:text-gray-400 dark:hover:text-teal-400 transition-all duration-200 group"
               >
-                <div className="p-2 rounded-full group-hover:bg-teal-50 dark:group-hover:bg-teal-900/20 transition-colors">
-                  <MessageCircle className="h-4 w-4" />
+                <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-teal-50 dark:group-hover:bg-teal-900/20 transition-colors">
+                  <MessageCircle className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
-                <span className="text-sm font-medium">
+                <span className="text-xs sm:text-sm font-medium">
                   {post.comment_count}
                 </span>
               </motion.button>
@@ -152,12 +248,14 @@ const ExplorePostCard = ({
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={onInteractionAttempt}
-                className="flex items-center space-x-2 text-slate-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 transition-all duration-200 group"
+                className="flex items-center space-x-1 sm:space-x-2 text-slate-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400 transition-all duration-200 group"
               >
-                <div className="p-2 rounded-full group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
-                  <Share className="h-4 w-4" />
+                <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-blue-50 dark:group-hover:bg-blue-900/20 transition-colors">
+                  <Share className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                 </div>
-                <span className="text-sm font-medium">{post.share_count}</span>
+                <span className="text-xs sm:text-sm font-medium">
+                  {post.share_count}
+                </span>
               </motion.button>
             </div>
 
@@ -167,13 +265,23 @@ const ExplorePostCard = ({
               onClick={onInteractionAttempt}
               className="text-slate-500 hover:text-amber-500 dark:text-gray-400 dark:hover:text-amber-400 transition-all duration-200 group"
             >
-              <div className="p-2 rounded-full group-hover:bg-amber-50 dark:group-hover:bg-amber-900/20 transition-colors">
-                <Bookmark className="h-4 w-4" />
+              <div className="p-1.5 sm:p-2 rounded-full group-hover:bg-amber-50 dark:group-hover:bg-amber-900/20 transition-colors">
+                <Bookmark className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
               </div>
             </motion.button>
           </div>
         </div>
       </CardContent>
+
+      {/* Image Viewer Modal */}
+      {post.media && post.media.length > 0 && (
+        <ImageViewer
+          images={post.media.map((media) => media.url)}
+          initialIndex={selectedImageIndex}
+          isOpen={showImageViewer}
+          onClose={() => setShowImageViewer(false)}
+        />
+      )}
     </Card>
   );
 };
@@ -181,35 +289,95 @@ const ExplorePostCard = ({
 // Loading component
 const PostSkeleton = () => (
   <Card className="w-full border-0 border-b border-gray-200 dark:border-gray-800 rounded-none bg-white dark:bg-gray-900">
-    <CardHeader className="pb-3">
+    <CardHeader className="pb-3 px-3 sm:px-6">
       <div className="flex items-center space-x-3">
-        <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
-        <div className="space-y-2">
-          <div className="h-4 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-          <div className="h-3 w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-9 w-9 sm:h-10 sm:w-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse flex-shrink-0" />
+        <div className="space-y-2 min-w-0 flex-1">
+          <div className="h-3 sm:h-4 w-24 sm:w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-2 sm:h-3 w-16 sm:w-24 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
         </div>
       </div>
     </CardHeader>
-    <CardContent className="pt-0 pb-4">
+    <CardContent className="pt-0 pb-4 px-3 sm:px-6">
       <div className="space-y-3">
-        <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        <div className="h-32 w-full bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
+        <div className="h-3 sm:h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-3 sm:h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-24 sm:h-32 w-full bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse" />
       </div>
     </CardContent>
   </Card>
 );
 
+// Main Feed Skeleton for authenticated users
+const MainFeedSkeleton = () => (
+  <div className="space-y-6">
+    {/* Create Post Skeleton */}
+    <Card className="p-6 bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800">
+      <div className="flex items-center space-x-3 mb-4">
+        <div className="h-10 w-10 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+        <div className="flex-1 h-12 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse" />
+      </div>
+      <div className="flex justify-between items-center">
+        <div className="flex space-x-2">
+          <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+          <div className="h-8 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+        <div className="h-10 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+      </div>
+    </Card>
+
+    {/* Posts Skeleton */}
+    <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
+      <div className="space-y-0">
+        {[1, 2, 3, 4, 5].map((i) => (
+          <PostSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
+// Explore Header Skeleton
+const ExploreHeaderSkeleton = () => (
+  <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+    <div className="relative p-4 sm:p-6 md:p-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+        <div className="flex-1">
+          <div className="h-8 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-3" />
+          <div className="h-5 w-full max-w-md bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+        <div className="hidden sm:flex items-center space-x-2">
+          <div className="w-2 h-2 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+          <div className="h-4 w-8 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        </div>
+      </div>
+
+      {/* Interactive Stats Skeleton */}
+      <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-4">
+        {[1, 2, 3].map((i) => (
+          <div
+            key={i}
+            className="text-center p-2 sm:p-3 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm"
+          >
+            <div className="h-6 sm:h-8 w-8 sm:w-12 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto mb-2" />
+            <div className="h-3 w-16 sm:w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mx-auto" />
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
+
 // Left Sidebar Skeleton
 const LeftSidebarSkeleton = () => (
   <div className="sticky top-24">
-    <Card className="p-6">
-      <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
-      <div className="space-y-4">
-        <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        <div className="h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-        <div className="h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+    <Card className="p-4 sm:p-6">
+      <div className="h-5 sm:h-6 w-24 sm:w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+      <div className="space-y-3 sm:space-y-4">
+        <div className="h-3 sm:h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-3 sm:h-4 w-3/4 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-8 sm:h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+        <div className="h-8 sm:h-10 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
       </div>
     </Card>
   </div>
@@ -217,32 +385,32 @@ const LeftSidebarSkeleton = () => (
 
 // Right Sidebar Skeleton
 const RightSidebarSkeleton = () => (
-  <div className="sticky top-24 space-y-6">
-    <Card className="p-6">
-      <div className="h-6 w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+  <div className="sticky top-24 space-y-4 sm:space-y-6">
+    <Card className="p-4 sm:p-6">
+      <div className="h-5 sm:h-6 w-32 sm:w-40 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
       <div className="space-y-3">
         {[1, 2, 3, 4, 5].map((i) => (
           <div
             key={i}
-            className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
+            className="h-3 sm:h-4 w-full bg-gray-200 dark:bg-gray-700 rounded animate-pulse"
           />
         ))}
       </div>
     </Card>
 
-    <Card className="p-6">
-      <div className="h-6 w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
-      <div className="space-y-4">
+    <Card className="p-4 sm:p-6">
+      <div className="h-5 sm:h-6 w-24 sm:w-32 bg-gray-200 dark:bg-gray-700 rounded animate-pulse mb-4" />
+      <div className="space-y-3 sm:space-y-4">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="h-8 w-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+              <div className="h-6 w-6 sm:h-8 sm:w-8 bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
               <div className="space-y-2">
-                <div className="h-3 w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
-                <div className="h-2 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-3 w-16 sm:w-20 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+                <div className="h-2 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
               </div>
             </div>
-            <div className="h-6 w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
+            <div className="h-5 sm:h-6 w-12 sm:w-16 bg-gray-200 dark:bg-gray-700 rounded animate-pulse" />
           </div>
         ))}
       </div>
@@ -259,6 +427,7 @@ const HomePage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [isSidebarLoading, setIsSidebarLoading] = useState(true);
+  const [isMainFeedLoading, setIsMainFeedLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -326,13 +495,14 @@ const HomePage = () => {
       // Simulate sidebar loading delay for better UX
       setTimeout(() => {
         setIsSidebarLoading(false);
+        setIsMainFeedLoading(false);
       }, 1000);
     };
 
     // Small delay to prevent rapid execution
     const timeoutId = setTimeout(initializePage, 100);
     return () => clearTimeout(timeoutId);
-  }, [loadExplorePosts]); // Remove router from dependencies
+  }, [loadExplorePosts, router, isRedirecting]); // Fixed dependencies
 
   // Infinite scroll with Intersection Observer
   useEffect(() => {
@@ -369,18 +539,18 @@ const HomePage = () => {
   if (isAuthenticated_) {
     // Authenticated user - show full feed
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 sm:pt-24">
+        <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
             {/* Left Sidebar - User info */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 order-2 lg:order-1">
               {isSidebarLoading ? (
                 <LeftSidebarSkeleton />
               ) : (
                 <div className="sticky top-24">
-                  <Card className="p-6">
+                  <Card className="p-4 sm:p-6">
                     <div className="flex items-center space-x-3 mb-4">
-                      <Avatar className="h-12 w-12">
+                      <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                         <AvatarImage
                           src={currentUser?.avatar_url}
                           alt={currentUser?.full_name}
@@ -393,18 +563,18 @@ const HomePage = () => {
                             .toUpperCase() || "U"}
                         </AvatarFallback>
                       </Avatar>
-                      <div>
-                        <p className="font-semibold text-gray-900 dark:text-gray-100">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-semibold text-gray-900 dark:text-gray-100 text-sm sm:text-base truncate">
                           {currentUser?.full_name}
                         </p>
-                        <p className="text-sm text-gray-500 dark:text-gray-400">
+                        <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 truncate">
                           @{currentUser?.username}
                         </p>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 gap-4 text-center">
+                    <div className="grid grid-cols-3 gap-2 sm:gap-4 text-center">
                       <div>
-                        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                           {currentUser?.posts_count || 0}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -412,7 +582,7 @@ const HomePage = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                           {currentUser?.followers_count || 0}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -420,7 +590,7 @@ const HomePage = () => {
                         </p>
                       </div>
                       <div>
-                        <p className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                        <p className="text-base sm:text-lg font-semibold text-gray-900 dark:text-gray-100">
                           {currentUser?.following_count || 0}
                         </p>
                         <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -434,20 +604,27 @@ const HomePage = () => {
             </div>
 
             {/* Main Feed */}
-            <div className="lg:col-span-2">
-              <CreatePost
-                onPostCreated={() => setRefreshTrigger((prev) => prev + 1)}
-              />
-              <InfiniteFeed refreshTrigger={refreshTrigger} />
+            <div className="lg:col-span-2 order-1 lg:order-2">
+              {isMainFeedLoading ? (
+                <MainFeedSkeleton />
+              ) : (
+                <>
+                  <CreatePost
+                    onPostCreated={() => setRefreshTrigger((prev) => prev + 1)}
+                  />
+                  <InfiniteFeed refreshTrigger={refreshTrigger} />
+                </>
+              )}
             </div>
 
             {/* Right Sidebar - Suggestions */}
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 order-3">
               {isSidebarLoading ? (
                 <RightSidebarSkeleton />
               ) : (
                 <div className="sticky top-24">
-                  <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-white to-slate-50/50 dark:from-gray-900 dark:to-gray-800/50 p-6">
+                  <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-white to-slate-50/50 dark:from-gray-900 dark:to-gray-800/50 p-4 sm:p-6">
+                    {/* Rest of right sidebar content remains the same */}
                     <div className="flex items-center justify-between mb-6">
                       <h3 className="font-bold text-slate-800 dark:text-white text-lg">
                         💡 Suggested for you
@@ -506,73 +683,77 @@ const HomePage = () => {
 
   // Non-authenticated user - show explore with login sidebar
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 pt-20 sm:pt-24">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
           {/* Left Sidebar - Sign up prompt */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 order-2 lg:order-1">
             {isSidebarLoading ? <LeftSidebarSkeleton /> : <LoggedOutSidebar />}
           </div>
 
           {/* Main Feed - Explore Posts */}
-          <div className="lg:col-span-2">
+          <div className="lg:col-span-2 order-1 lg:order-2">
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
-              className="space-y-6"
+              className="space-y-4 sm:space-y-6"
             >
               {/* Enhanced Explore Header */}
-              <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5 dark:from-blue-400/5 dark:to-indigo-400/5"></div>
-                <div className="relative p-8">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h2 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-gray-200 bg-clip-text text-transparent mb-3">
-                        Explore
-                      </h2>
-                      <p className="text-slate-600 dark:text-gray-300 text-lg leading-relaxed max-w-md">
-                        Discover what&apos;s happening in the Gulf professional
-                        community
-                      </p>
+              {isLoading ? (
+                <ExploreHeaderSkeleton />
+              ) : (
+                <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 dark:from-gray-800 dark:via-gray-900 dark:to-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700">
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-indigo-600/5 dark:from-blue-400/5 dark:to-indigo-400/5"></div>
+                  <div className="relative p-4 sm:p-6 md:p-8">
+                    <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                      <div className="flex-1">
+                        <h2 className="text-2xl sm:text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-gray-200 bg-clip-text text-transparent mb-3">
+                          Explore
+                        </h2>
+                        <p className="text-slate-600 dark:text-gray-300 text-base sm:text-lg leading-relaxed">
+                          Discover what&apos;s happening in the Gulf
+                          professional community
+                        </p>
+                      </div>
+                      <div className="hidden sm:flex items-center space-x-2">
+                        <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                        <span className="text-sm text-slate-500 dark:text-gray-400">
+                          Live
+                        </span>
+                      </div>
                     </div>
-                    <div className="hidden sm:flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-                      <span className="text-sm text-slate-500 dark:text-gray-400">
-                        Live
-                      </span>
-                    </div>
-                  </div>
 
-                  {/* Interactive Stats */}
-                  <div className="mt-6 grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
-                      <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                        {posts.length}
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-gray-400 uppercase tracking-wide">
-                        Posts Today
-                      </p>
-                    </div>
-                    <div className="text-center p-3 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
-                      <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                        2.4k
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-gray-400 uppercase tracking-wide">
-                        Active Users
-                      </p>
-                    </div>
-                    <div className="text-center p-3 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
-                      <p className="text-2xl font-bold text-slate-800 dark:text-white">
-                        156
-                      </p>
-                      <p className="text-xs text-slate-500 dark:text-gray-400 uppercase tracking-wide">
-                        New Today
-                      </p>
+                    {/* Interactive Stats */}
+                    <div className="mt-6 grid grid-cols-3 gap-2 sm:gap-4">
+                      <div className="text-center p-2 sm:p-3 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
+                        <p className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-white">
+                          {posts.length}
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 uppercase tracking-wide">
+                          Posts Today
+                        </p>
+                      </div>
+                      <div className="text-center p-2 sm:p-3 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
+                        <p className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-white">
+                          2.4k
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 uppercase tracking-wide">
+                          Active Users
+                        </p>
+                      </div>
+                      <div className="text-center p-2 sm:p-3 rounded-xl bg-white/60 dark:bg-gray-800/60 backdrop-blur-sm">
+                        <p className="text-lg sm:text-2xl font-bold text-slate-800 dark:text-white">
+                          156
+                        </p>
+                        <p className="text-xs text-slate-500 dark:text-gray-400 uppercase tracking-wide">
+                          New Today
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-800 overflow-hidden">
                 {isLoading ? (
@@ -595,12 +776,14 @@ const HomePage = () => {
                     {hasMore && (
                       <div
                         ref={loadMoreRef}
-                        className="p-6 border-t border-gray-200 dark:border-gray-800 flex justify-center"
+                        className="p-4 sm:p-6 border-t border-gray-200 dark:border-gray-800 flex justify-center"
                       >
                         {isLoadingMore ? (
                           <div className="flex items-center text-slate-500 dark:text-gray-400">
                             <Loader2 className="mr-2 h-4 w-4 animate-spin text-teal-500" />
-                            Loading more posts...
+                            <span className="text-sm">
+                              Loading more posts...
+                            </span>
                           </div>
                         ) : (
                           <div className="text-slate-400 dark:text-gray-500 text-sm">
@@ -611,11 +794,11 @@ const HomePage = () => {
                     )}
                   </div>
                 ) : (
-                  <div className="p-12 text-center">
-                    <div className="w-16 h-16 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <MessageCircle className="w-8 h-8 text-slate-400 dark:text-gray-500" />
+                  <div className="p-8 sm:p-12 text-center">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 bg-slate-100 dark:bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <MessageCircle className="w-6 h-6 sm:w-8 sm:h-8 text-slate-400 dark:text-gray-500" />
                     </div>
-                    <p className="text-slate-500 dark:text-gray-400 text-lg">
+                    <p className="text-slate-500 dark:text-gray-400 text-base sm:text-lg">
                       No public posts available at the moment.
                     </p>
                     <p className="text-slate-400 dark:text-gray-500 text-sm mt-2">
@@ -628,21 +811,22 @@ const HomePage = () => {
           </div>
 
           {/* Right Sidebar - Trending */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 order-3">
             {isSidebarLoading ? (
               <RightSidebarSkeleton />
             ) : (
-              <div className="sticky top-24 space-y-6">
+              <div className="sticky top-24 space-y-4 sm:space-y-6">
                 {/* Enhanced Trending Card */}
                 <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-white to-slate-50/50 dark:from-gray-900 dark:to-gray-800/50">
-                  <div className="p-6">
-                    <div className="flex items-center justify-between mb-6">
-                      <h3 className="font-bold text-slate-800 dark:text-white text-lg">
+                  <div className="p-4 sm:p-6">
+                    {/* Trending content */}
+                    <div className="flex items-center justify-between mb-4 sm:mb-6">
+                      <h3 className="font-bold text-slate-800 dark:text-white text-base sm:text-lg">
                         🔥 Trending in Gulf
                       </h3>
                       <div className="w-2 h-2 bg-orange-500 rounded-full animate-pulse"></div>
                     </div>
-                    <div className="space-y-4">
+                    <div className="space-y-3 sm:space-y-4">
                       {[
                         { tag: "#DubaiJobs", count: 1247, trend: "+12%" },
                         { tag: "#RemoteWork", count: 892, trend: "+8%" },
@@ -657,18 +841,18 @@ const HomePage = () => {
                         <motion.div
                           key={i}
                           whileHover={{ scale: 1.02, x: 4 }}
-                          className="group cursor-pointer p-3 rounded-xl hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-gray-700"
+                          className="group cursor-pointer p-2 sm:p-3 rounded-xl hover:bg-white/60 dark:hover:bg-gray-800/60 transition-all duration-200 border border-transparent hover:border-slate-200 dark:hover:border-gray-700"
                         >
                           <div className="flex items-center justify-between">
-                            <div>
-                              <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-semibold text-teal-600 dark:text-teal-400 group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors truncate">
                                 {item.tag}
                               </p>
                               <p className="text-xs text-slate-500 dark:text-gray-400">
                                 {item.count.toLocaleString()} posts
                               </p>
                             </div>
-                            <div className="text-right">
+                            <div className="text-right ml-2">
                               <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
                                 {item.trend}
                               </span>
@@ -682,24 +866,24 @@ const HomePage = () => {
 
                 {/* Enhanced Join Card */}
                 <Card className="overflow-hidden border-0 shadow-sm bg-gradient-to-br from-white to-blue-50/30 dark:from-gray-900 dark:to-blue-900/10">
-                  <div className="p-6">
-                    <div className="text-center mb-6">
-                      <div className="w-16 h-16 bg-gradient-to-br from-teal-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                        <span className="text-white text-2xl font-bold">
+                  <div className="p-4 sm:p-6">
+                    <div className="text-center mb-4 sm:mb-6">
+                      <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-teal-500 to-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                        <span className="text-white text-xl sm:text-2xl font-bold">
                           GR
                         </span>
                       </div>
-                      <h3 className="font-bold text-slate-800 dark:text-white text-lg mb-2">
+                      <h3 className="font-bold text-slate-800 dark:text-white text-base sm:text-lg mb-2">
                         Why join Gulf Return?
                       </h3>
                     </div>
 
-                    <div className="space-y-4 mb-6">
+                    <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
                       <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-teal-500 to-teal-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-slate-700 dark:text-gray-200">
                             Connect with Gulf professionals
                           </p>
@@ -710,10 +894,10 @@ const HomePage = () => {
                       </div>
 
                       <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
                           <p className="text-sm font-medium text-slate-700 dark:text-gray-200">
                             Share your professional journey
                           </p>
@@ -724,10 +908,11 @@ const HomePage = () => {
                       </div>
 
                       <div className="flex items-start space-x-3">
-                        <div className="w-6 h-6 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
-                          <div className="w-2 h-2 bg-white rounded-full"></div>
+                        <div className="w-5 h-5 sm:w-6 sm:h-6 bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <div className="w-1.5 h-1.5 sm:w-2 sm:h-2 bg-white rounded-full"></div>
                         </div>
-                        <div>
+                        <div className="min-w-0 flex-1">
+                          {/* Continue from here */}
                           <p className="text-sm font-medium text-slate-700 dark:text-gray-200">
                             Discover career opportunities
                           </p>
@@ -740,7 +925,7 @@ const HomePage = () => {
 
                     <Button
                       onClick={() => router.push("/auth")}
-                      className="w-full h-12 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                      className="w-full h-10 sm:h-12 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 text-sm sm:text-base"
                     >
                       Join Gulf Return
                     </Button>

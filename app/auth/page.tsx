@@ -322,7 +322,7 @@ const AuthPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50/30 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center p-4 pt-24 sm:pt-28">
       {showOTPVerification ? (
         <OTPVerification
           email={otpEmail}
@@ -336,7 +336,8 @@ const AuthPage = () => {
           onBack={handleForgotPasswordBack}
         />
       ) : (
-        <div className="w-full max-w-6xl mx-auto grid lg:grid-cols-2 gap-8 items-center">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-8 items-center min-h-[calc(100vh-8rem)]">
           {/* Enhanced Left side - Branding */}
           <motion.div
             initial={{ opacity: 0, x: -50 }}
@@ -436,44 +437,43 @@ const AuthPage = () => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="w-full max-w-md mx-auto"
+            className="w-full max-w-md mx-auto lg:max-w-lg"
           >
             <Card className="shadow-2xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl overflow-hidden">
-              <CardHeader className="space-y-1 text-center pb-8 bg-gradient-to-r from-slate-50 to-blue-50/30 dark:from-gray-800/50 dark:to-gray-900/50">
+              <CardHeader className="space-y-1 text-center pb-4 bg-gradient-to-r from-slate-50 to-blue-50/30 dark:from-gray-800/50 dark:to-gray-900/50">
                 <motion.div
                   initial={{ scale: 0.8 }}
                   animate={{ scale: 1 }}
                   transition={{ delay: 0.4 }}
                 >
-                  <CardTitle className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-gray-200 bg-clip-text text-transparent">
+                  <CardTitle className="text-2xl font-bold bg-gradient-to-r from-slate-800 to-slate-600 dark:from-white dark:to-gray-200 bg-clip-text text-transparent">
                     Welcome
                   </CardTitle>
-                  <CardDescription className="text-slate-500 dark:text-gray-400 mt-2">
+                  <CardDescription className="text-slate-500 dark:text-gray-400 text-sm">
                     Join the Gulf professional community
                   </CardDescription>
                 </motion.div>
               </CardHeader>
 
-              <CardContent className="p-6">
+              <CardContent className="p-4 lg:p-6 space-y-4">
                 {/* Google Sign-In Button */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
-                  className="mb-6"
                 >
                   <Button
                     onClick={handleGoogleSignIn}
                     disabled={isGoogleLoading}
-                    className="w-full h-12 bg-white hover:bg-gray-50 border border-slate-300 text-slate-700 font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group"
+                    className="w-full h-10 bg-white hover:bg-gray-50 border border-slate-300 text-slate-700 font-medium rounded-xl shadow-sm hover:shadow-md transition-all duration-200 group"
                     variant="outline"
                   >
                     {isGoogleLoading ? (
-                      <Loader2 className="mr-3 h-5 w-5 animate-spin text-slate-600" />
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin text-slate-600" />
                     ) : (
-                      <Chrome className="mr-3 h-5 w-5 text-slate-600 group-hover:text-blue-600 transition-colors" />
+                      <Chrome className="mr-2 h-4 w-4 text-slate-600 group-hover:text-blue-600 transition-colors" />
                     )}
-                    <span className="text-slate-700 group-hover:text-slate-900 transition-colors">
+                    <span className="text-slate-700 group-hover:text-slate-900 transition-colors text-sm">
                       {isGoogleLoading
                         ? "Connecting..."
                         : "Continue with Google"}
@@ -482,28 +482,28 @@ const AuthPage = () => {
                 </motion.div>
 
                 {/* Divider */}
-                <div className="relative mb-6">
+                <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <div className="w-full border-t border-slate-200 dark:border-gray-700"></div>
                   </div>
                   <div className="relative flex justify-center text-sm">
-                    <span className="px-4 bg-white dark:bg-gray-900 text-slate-500 dark:text-gray-400 font-medium">
+                    <span className="px-3 bg-white dark:bg-gray-900 text-slate-500 dark:text-gray-400 text-xs">
                       Or continue with email
                     </span>
                   </div>
                 </div>
 
                 <Tabs defaultValue="login" className="w-full">
-                  <TabsList className="grid w-full grid-cols-2 mb-6 bg-slate-100 dark:bg-gray-800 rounded-xl p-1">
+                  <TabsList className="grid w-full grid-cols-2 bg-slate-100 dark:bg-gray-800 rounded-xl p-1">
                     <TabsTrigger
                       value="login"
-                      className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg font-medium transition-all"
+                      className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg font-medium transition-all text-sm"
                     >
                       Sign In
                     </TabsTrigger>
                     <TabsTrigger
                       value="register"
-                      className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg font-medium transition-all"
+                      className="data-[state=active]:bg-white dark:data-[state=active]:bg-gray-700 data-[state=active]:text-slate-900 dark:data-[state=active]:text-white data-[state=active]:shadow-sm rounded-lg font-medium transition-all text-sm"
                     >
                       Sign Up
                     </TabsTrigger>
@@ -532,25 +532,25 @@ const AuthPage = () => {
                   <TabsContent value="login">
                     <motion.form
                       onSubmit={handleLogin}
-                      className="space-y-6"
+                      className="space-y-4"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <Label
                           htmlFor="email"
-                          className="text-slate-700 dark:text-gray-200 font-medium"
+                          className="text-slate-700 dark:text-gray-200 font-medium text-sm"
                         >
                           Email
                         </Label>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-gray-500" />
+                          <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-gray-500" />
                           <Input
                             id="email"
                             type="email"
                             placeholder="Enter your email"
-                            className={`pl-10 h-12 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
+                            className={`pl-10 h-10 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
                               validationErrors.email
                                 ? "border-red-300 focus:ring-red-500"
                                 : ""
@@ -562,42 +562,44 @@ const AuthPage = () => {
                                 email: e.target.value,
                               });
                               validateField("email", e.target.value);
+                              setError(""); // Clear error on input change
                             }}
                             required
                           />
                           {loginForm.email &&
                             EMAIL_REGEX.test(loginForm.email) && (
-                              <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-emerald-500" />
+                              <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-emerald-500" />
                             )}
                         </div>
                         {validationErrors.email && (
-                          <p className="text-sm text-red-600 dark:text-red-400 mt-1">
+                          <p className="text-xs text-red-600 dark:text-red-400">
                             {validationErrors.email}
                           </p>
                         )}
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <Label
                           htmlFor="password"
-                          className="text-slate-700 dark:text-gray-200 font-medium"
+                          className="text-slate-700 dark:text-gray-200 font-medium text-sm"
                         >
                           Password
                         </Label>
                         <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-gray-500" />
+                          <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-gray-500" />
                           <Input
                             id="password"
                             type="password"
                             placeholder="Enter your password"
-                            className="pl-10 h-12 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all"
+                            className="pl-10 h-10 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all"
                             value={loginForm.password}
-                            onChange={(e) =>
+                            onChange={(e) => {
                               setLoginForm({
                                 ...loginForm,
                                 password: e.target.value,
-                              })
-                            }
+                              });
+                              setError(""); // Clear error on input change
+                            }}
                             required
                           />
                         </div>
@@ -607,7 +609,7 @@ const AuthPage = () => {
                           <button
                             type="button"
                             onClick={() => setShowForgotPassword(true)}
-                            className="text-sm text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 hover:underline transition-colors"
+                            className="text-xs text-teal-600 hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 hover:underline transition-colors"
                           >
                             Forgot password?
                           </button>
@@ -616,7 +618,7 @@ const AuthPage = () => {
 
                       <Button
                         type="submit"
-                        className="w-full h-12 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                        className="w-full h-10 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -632,26 +634,26 @@ const AuthPage = () => {
                   <TabsContent value="register">
                     <motion.form
                       onSubmit={handleRegister}
-                      className="space-y-4"
+                      className="space-y-3"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
                     >
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
                           <Label
                             htmlFor="full_name"
-                            className="text-slate-700 dark:text-gray-200 font-medium"
+                            className="text-slate-700 dark:text-gray-200 font-medium text-sm"
                           >
                             Full Name
                           </Label>
                           <div className="relative">
-                            <User className="absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-gray-500" />
+                            <User className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-gray-500" />
                             <Input
                               id="full_name"
                               type="text"
                               placeholder="John Doe"
-                              className={`pl-10 h-12 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
+                              className={`pl-10 h-10 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
                                 validationErrors.full_name
                                   ? "border-red-300 focus:ring-red-500"
                                   : ""
@@ -663,12 +665,13 @@ const AuthPage = () => {
                                   full_name: e.target.value,
                                 });
                                 validateField("full_name", e.target.value);
+                                setError(""); // Clear error on input change
                               }}
                               required
                             />
                             {registerForm.full_name &&
                               registerForm.full_name.trim().length >= 2 && (
-                                <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-emerald-500" />
+                                <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-emerald-500" />
                               )}
                           </div>
                           {validationErrors.full_name && (
@@ -678,20 +681,20 @@ const AuthPage = () => {
                           )}
                         </div>
 
-                        <div className="space-y-2">
+                        <div className="space-y-1">
                           <Label
                             htmlFor="username"
-                            className="text-slate-700 dark:text-gray-200 font-medium"
+                            className="text-slate-700 dark:text-gray-200 font-medium text-sm"
                           >
                             Username
                           </Label>
                           <div className="relative">
-                            <UserCheck className="absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-gray-500" />
+                            <UserCheck className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-gray-500" />
                             <Input
                               id="username"
                               type="text"
                               placeholder="johndoe"
-                              className={`pl-10 h-12 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
+                              className={`pl-10 h-10 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
                                 validationErrors.username
                                   ? "border-red-300 focus:ring-red-500"
                                   : ""
@@ -703,12 +706,13 @@ const AuthPage = () => {
                                   username: e.target.value,
                                 });
                                 validateField("username", e.target.value);
+                                setError(""); // Clear error on input change
                               }}
                               required
                             />
                             {registerForm.username &&
                               USERNAME_REGEX.test(registerForm.username) && (
-                                <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-emerald-500" />
+                                <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-emerald-500" />
                               )}
                           </div>
                           {validationErrors.username && (
@@ -719,20 +723,20 @@ const AuthPage = () => {
                         </div>
                       </div>
 
-                      <div className="space-y-2">
+                      <div className="space-y-1">
                         <Label
                           htmlFor="reg_email"
-                          className="text-slate-700 dark:text-gray-200 font-medium"
+                          className="text-slate-700 dark:text-gray-200 font-medium text-sm"
                         >
                           Email
                         </Label>
                         <div className="relative">
-                          <Mail className="absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-gray-500" />
+                          <Mail className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-gray-500" />
                           <Input
                             id="reg_email"
                             type="email"
-                            placeholder="john@example.com"
-                            className={`pl-10 h-12 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
+                            placeholder="Enter your email"
+                            className={`pl-10 h-10 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
                               validationErrors.email
                                 ? "border-red-300 focus:ring-red-500"
                                 : ""
@@ -744,106 +748,109 @@ const AuthPage = () => {
                                 email: e.target.value,
                               });
                               validateField("email", e.target.value);
+                              setError(""); // Clear error on input change
                             }}
                             required
                           />
                           {registerForm.email &&
                             EMAIL_REGEX.test(registerForm.email) && (
-                              <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-emerald-500" />
+                              <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-emerald-500" />
                             )}
                         </div>
                         {validationErrors.email && (
-                          <p className="text-sm text-red-600 dark:text-red-400">
+                          <p className="text-xs text-red-600 dark:text-red-400">
                             {validationErrors.email}
                           </p>
                         )}
                       </div>
 
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="reg_password"
-                          className="text-slate-700 dark:text-gray-200 font-medium"
-                        >
-                          Password
-                        </Label>
-                        <div className="relative">
-                          <Lock className="absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-gray-500" />
-                          <Input
-                            id="reg_password"
-                            type="password"
-                            placeholder="Create a secure password"
-                            className={`pl-10 pr-10 h-12 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
-                              validationErrors.password
-                                ? "border-red-300 focus:ring-red-500"
-                                : ""
-                            }`}
-                            value={registerForm.password}
-                            onChange={(e) => {
-                              setRegisterForm({
-                                ...registerForm,
-                                password: e.target.value,
-                              });
-                              validateField("password", e.target.value);
-                            }}
-                            required
-                          />
-                          {registerForm.password &&
-                            PASSWORD_REGEX.test(registerForm.password) && (
-                              <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-emerald-500" />
-                            )}
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="reg_password"
+                            className="text-slate-700 dark:text-gray-200 font-medium text-sm"
+                          >
+                            Password
+                          </Label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-gray-500" />
+                            <Input
+                              id="reg_password"
+                              type="password"
+                              placeholder="Create password"
+                              className={`pl-10 h-10 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
+                                validationErrors.password
+                                  ? "border-red-300 focus:ring-red-500"
+                                  : ""
+                              }`}
+                              value={registerForm.password}
+                              onChange={(e) => {
+                                setRegisterForm({
+                                  ...registerForm,
+                                  password: e.target.value,
+                                });
+                                validateField("password", e.target.value);
+                                setError(""); // Clear error on input change
+                              }}
+                              required
+                            />
+                            {registerForm.password &&
+                              PASSWORD_REGEX.test(registerForm.password) && (
+                                <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-emerald-500" />
+                              )}
+                          </div>
+                          {validationErrors.password && (
+                            <p className="text-xs text-red-600 dark:text-red-400">
+                              {validationErrors.password}
+                            </p>
+                          )}
                         </div>
-                        {validationErrors.password && (
-                          <p className="text-sm text-red-600 dark:text-red-400">
-                            {validationErrors.password}
-                          </p>
-                        )}
-                      </div>
 
-                      <div className="space-y-2">
-                        <Label
-                          htmlFor="confirm_password"
-                          className="text-slate-700 dark:text-gray-200 font-medium"
-                        >
-                          Confirm Password
-                        </Label>
-                        <div className="relative">
-                          <Shield className="absolute left-3 top-3 h-4 w-4 text-slate-400 dark:text-gray-500" />
-                          <Input
-                            id="confirm_password"
-                            type="password"
-                            placeholder="Confirm your password"
-                            className={`pl-10 pr-10 h-12 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
-                              validationErrors.confirmPassword
-                                ? "border-red-300 focus:ring-red-500"
-                                : ""
-                            }`}
-                            value={registerForm.confirmPassword}
-                            onChange={(e) => {
-                              setRegisterForm({
-                                ...registerForm,
-                                confirmPassword: e.target.value,
-                              });
-                              validateField("confirmPassword", e.target.value);
-                            }}
-                            required
-                          />
-                          {registerForm.confirmPassword &&
-                            registerForm.confirmPassword ===
-                              registerForm.password &&
-                            registerForm.password && (
-                              <CheckCircle2 className="absolute right-3 top-3 h-4 w-4 text-emerald-500" />
-                            )}
+                        <div className="space-y-1">
+                          <Label
+                            htmlFor="confirm_password"
+                            className="text-slate-700 dark:text-gray-200 font-medium text-sm"
+                          >
+                            Confirm
+                          </Label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-2.5 h-4 w-4 text-slate-400 dark:text-gray-500" />
+                            <Input
+                              id="confirm_password"
+                              type="password"
+                              placeholder="Confirm password"
+                              className={`pl-10 h-10 rounded-xl border-slate-200 dark:border-gray-700 focus:ring-2 focus:ring-teal-500 dark:focus:ring-teal-400 transition-all ${
+                                validationErrors.confirmPassword
+                                  ? "border-red-300 focus:ring-red-500"
+                                  : ""
+                              }`}
+                              value={registerForm.confirmPassword}
+                              onChange={(e) => {
+                                setRegisterForm({
+                                  ...registerForm,
+                                  confirmPassword: e.target.value,
+                                });
+                                validateField("confirmPassword", e.target.value);
+                                setError(""); // Clear error on input change
+                              }}
+                              required
+                            />
+                            {registerForm.confirmPassword &&
+                              registerForm.password === registerForm.confirmPassword && (
+                                <CheckCircle2 className="absolute right-3 top-2.5 h-4 w-4 text-emerald-500" />
+                              )}
+                          </div>
+                          {validationErrors.confirmPassword && (
+                            <p className="text-xs text-red-600 dark:text-red-400">
+                              {validationErrors.confirmPassword}
+                            </p>
+                          )}
                         </div>
-                        {validationErrors.confirmPassword && (
-                          <p className="text-sm text-red-600 dark:text-red-400">
-                            {validationErrors.confirmPassword}
-                          </p>
-                        )}
                       </div>
 
                       <Button
                         type="submit"
-                        className="w-full h-12 bg-gradient-to-r from-blue-600 to-teal-600 hover:from-blue-700 hover:to-teal-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5"
+                        className="w-full h-10 bg-gradient-to-r from-teal-600 to-blue-600 hover:from-teal-700 hover:to-blue-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-0.5 mt-4"
                         disabled={isLoading}
                       >
                         {isLoading ? (
@@ -874,6 +881,7 @@ const AuthPage = () => {
               </p>
             </motion.div>
           </motion.div>
+          </div>
         </div>
       )}
     </div>

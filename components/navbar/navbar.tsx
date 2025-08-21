@@ -20,16 +20,17 @@ import {
   Search,
   Bell,
   MessageCircle,
-  User,
+  UserIcon,
   Settings,
   LogOut,
   Home,
   Users,
-  BookOpen,
+  Briefcase,
   Menu,
   X,
   TrendingUp,
   Hash,
+  BookOpen,
 } from "lucide-react";
 import { isAuthenticated, getCurrentUser, authAPI, type User } from "@/lib/api";
 import { useToast } from "@/hooks/use-toast";
@@ -37,8 +38,8 @@ import { useToast } from "@/hooks/use-toast";
 // Search suggestions data
 const searchSuggestions = [
   { text: "professionals in Dubai", icon: Users },
-  { text: "remote work opportunities", icon: TrendingUp },
-  { text: "Gulf career advice", icon: BookOpen },
+  { text: "remote work opportunities", icon: Briefcase },
+  { text: "software engineer jobs", icon: TrendingUp },
   { text: "#TechCareers", icon: Hash },
   { text: "#DubaiJobs", icon: Hash },
   { text: "networking events", icon: Users },
@@ -58,13 +59,16 @@ export const Navbar = () => {
   const searchRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
 
-  const placeholderTexts = useMemo(() => [
-    "Search professionals...",
-    "Find job opportunities...",
-    "Explore trending topics...",
-    "Connect with people...",
-    "Discover companies...",
-  ], []);
+  const placeholderTexts = useMemo(
+    () => [
+      "Search professionals...",
+      "Find job opportunities...",
+      "Explore trending topics...",
+      "Connect with people...",
+      "Discover companies...",
+    ],
+    []
+  );
 
   useEffect(() => {
     const checkAuth = () => {
@@ -86,12 +90,12 @@ export const Navbar = () => {
     };
 
     window.addEventListener("storage", handleStorageChange);
-    
+
     // Custom event listener for manual auth updates
     const handleAuthChange = () => {
       checkAuth();
     };
-    
+
     window.addEventListener("authStateChanged", handleAuthChange);
 
     return () => {
@@ -160,9 +164,9 @@ export const Navbar = () => {
     try {
       setIsAuth(false);
       setCurrentUser(null);
-      
+
       await authAPI.logout();
-      
+
       toast({
         title: "Logged out",
         description: "You have been successfully logged out.",
@@ -188,7 +192,8 @@ export const Navbar = () => {
   const navLinks = [
     { href: isAuth ? "/feed" : "/", label: "Home", icon: Home },
     { href: "/people", label: "People", icon: Users },
-    { href: "/hashtag", label: "Explore", icon: BookOpen },
+    { href: "/jobs", label: "Jobs", icon: Briefcase },
+    { href: "/pages", label: "Pages", icon: BookOpen, requiresAuth: true },
   ];
 
   return (
@@ -228,7 +233,20 @@ export const Navbar = () => {
           {/* Enhanced Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-2">
             {navLinks.map((link) => {
+              // Skip rendering if auth is required but user is not authenticated
+              if (link.requiresAuth && !isAuth) {
+                return null;
+              }
+
               const Icon = link.icon;
+              const handleClick = () => {
+                if (link.requiresAuth && !isAuth) {
+                  router.push("/auth");
+                  return;
+                }
+                router.push(link.href);
+              };
+
               return (
                 <motion.div
                   key={link.href}
@@ -237,7 +255,7 @@ export const Navbar = () => {
                 >
                   <Button
                     variant="ghost"
-                    onClick={() => router.push(link.href)}
+                    onClick={handleClick}
                     className="flex items-center space-x-2 text-slate-600 hover:text-slate-800 dark:text-gray-300 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-gray-800 px-4 py-2 rounded-xl transition-all duration-200 group"
                   >
                     <Icon className="h-4 w-4 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors" />
@@ -455,7 +473,7 @@ export const Navbar = () => {
                         }
                         className="rounded-lg cursor-pointer hover:bg-slate-100 dark:hover:bg-gray-800 transition-colors p-3"
                       >
-                        <User className="mr-3 h-4 w-4 text-teal-600 dark:text-teal-400" />
+                        <UserIcon className="mr-3 h-4 w-4 text-teal-600 dark:text-teal-400" />
                         <span className="font-medium">Profile</span>
                       </DropdownMenuItem>
                       <DropdownMenuItem
@@ -563,7 +581,22 @@ export const Navbar = () => {
               {/* Enhanced Mobile Navigation Links */}
               <div className="space-y-2 mb-6">
                 {navLinks.map((link, index) => {
+                  // Skip rendering if auth is required but user is not authenticated
+                  if (link.requiresAuth && !isAuth) {
+                    return null;
+                  }
+
                   const Icon = link.icon;
+                  const handleClick = () => {
+                    if (link.requiresAuth && !isAuth) {
+                      router.push("/auth");
+                      setIsMobileMenuOpen(false);
+                      return;
+                    }
+                    router.push(link.href);
+                    setIsMobileMenuOpen(false);
+                  };
+
                   return (
                     <motion.div
                       key={link.href}
@@ -573,10 +606,7 @@ export const Navbar = () => {
                     >
                       <Button
                         variant="ghost"
-                        onClick={() => {
-                          router.push(link.href);
-                          setIsMobileMenuOpen(false);
-                        }}
+                        onClick={handleClick}
                         className="w-full justify-start hover:bg-slate-100 dark:hover:bg-gray-800 rounded-xl py-3 px-4 transition-all duration-200 group"
                       >
                         <Icon className="mr-3 h-5 w-5 text-slate-600 dark:text-gray-400 group-hover:text-teal-600 dark:group-hover:text-teal-400 transition-colors" />
