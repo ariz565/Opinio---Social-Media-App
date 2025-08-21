@@ -395,13 +395,22 @@ export const Navbar = () => {
                     variant="ghost"
                     size="sm"
                     className="relative h-10 w-10 rounded-xl hover:bg-slate-100 dark:hover:bg-gray-800 transition-all duration-200 group"
+                    onClick={() => router.push("/messages")}
+                    disabled={!isAuth}
+                    title={isAuth ? "Messages" : "Sign in to access messages"}
                   >
                     <MessageCircle className="h-5 w-5 text-slate-600 dark:text-gray-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
-                    <motion.span
-                      animate={{ scale: [1, 1.2, 1] }}
-                      transition={{ duration: 2, repeat: Infinity, delay: 0.5 }}
-                      className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full shadow-sm"
-                    />
+                    {isAuth && (
+                      <motion.span
+                        animate={{ scale: [1, 1.2, 1] }}
+                        transition={{
+                          duration: 2,
+                          repeat: Infinity,
+                          delay: 0.5,
+                        }}
+                        className="absolute -top-1 -right-1 h-3 w-3 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full shadow-sm"
+                      />
+                    )}
                   </Button>
                 </motion.div>
 

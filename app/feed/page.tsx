@@ -6,12 +6,16 @@ import { LeftSidebar } from "@/components/sidebar/left-sidebar.tsx/index";
 import { RightSidebar } from "@/components/sidebar/right-sidebar.tsx/index";
 import { MainFeed } from "@/components/feed/main-feed";
 import { CreatePostModal } from "@/components/posts";
+import ChatSidebar from "@/components/messaging/chat-sidebar";
 import { Plus } from "lucide-react";
 import {
   isCurrentlyRedirecting,
   setRedirectingState,
 } from "@/lib/redirect-manager";
-import { FeedSkeleton, SidebarSkeleton } from "@/components/ui/loading-skeletons";
+import {
+  FeedSkeleton,
+  SidebarSkeleton,
+} from "@/components/ui/loading-skeletons";
 
 export default function FeedPage() {
   const router = useRouter();
@@ -131,6 +135,9 @@ export default function FeedPage() {
           user={user}
         />
       )}
+
+      {/* Professional Chat Sidebar - LinkedIn Style */}
+      <ChatSidebar />
     </div>
   );
 }

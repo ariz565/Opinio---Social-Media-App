@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -12,7 +13,7 @@ import {
   MapPin,
   Calendar,
   Link2,
-  Edit3,
+  User,
   Camera,
 } from "lucide-react";
 import Link from "next/link";
@@ -22,7 +23,11 @@ interface LeftSidebarProps {
 }
 
 export const LeftSidebar = ({ user }: LeftSidebarProps) => {
-  const [isEditingBio, setIsEditingBio] = useState(false);
+  const router = useRouter();
+
+  const handleViewProfile = () => {
+    router.push(`/profile/${user?.username || 'user'}`);
+  };
 
   return (
     <div className="space-y-6 sticky top-6">
@@ -32,7 +37,11 @@ export const LeftSidebar = ({ user }: LeftSidebarProps) => {
           {/* Cover Photo */}
           <div className="relative h-24 bg-gradient-to-r from-teal-400 via-blue-500 to-purple-600 rounded-lg mb-4 overflow-hidden">
             <div className="absolute inset-0 bg-black/20"></div>
-            <button className="absolute top-2 right-2 p-1.5 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
+            <button 
+              className="absolute top-2 right-2 p-1.5 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
+              title="Edit cover photo"
+              aria-label="Edit cover photo"
+            >
               <Camera className="w-4 h-4 text-white" />
             </button>
           </div>
@@ -49,7 +58,11 @@ export const LeftSidebar = ({ user }: LeftSidebarProps) => {
                       "U"}
                   </AvatarFallback>
                 </Avatar>
-                <button className="absolute -bottom-1 -right-1 p-1 bg-teal-500 text-white rounded-full hover:bg-teal-600 transition-colors shadow-md">
+                <button 
+                  className="absolute -bottom-1 -right-1 p-1 bg-teal-500 text-white rounded-full hover:bg-teal-600 transition-colors shadow-md"
+                  title="Edit profile picture"
+                  aria-label="Edit profile picture"
+                >
                   <Camera className="w-3 h-3" />
                 </button>
               </div>
@@ -57,10 +70,10 @@ export const LeftSidebar = ({ user }: LeftSidebarProps) => {
                 variant="outline"
                 size="sm"
                 className="border-teal-200 dark:border-teal-800 text-teal-700 dark:text-teal-300 hover:bg-teal-50 dark:hover:bg-teal-900/30 bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm"
-                onClick={() => setIsEditingBio(!isEditingBio)}
+                onClick={handleViewProfile}
               >
-                <Edit3 className="w-3 h-3 mr-1" />
-                Edit
+                <User className="w-3 h-3 mr-1" />
+                View Profile
               </Button>
             </div>
           </div>
@@ -78,19 +91,10 @@ export const LeftSidebar = ({ user }: LeftSidebarProps) => {
 
             {/* Bio */}
             <div className="space-y-2">
-              {isEditingBio ? (
-                <textarea
-                  placeholder="Tell us about yourself..."
-                  className="w-full p-2 text-sm border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 rounded-lg resize-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-                  rows={3}
-                  defaultValue={user?.bio || ""}
-                />
-              ) : (
-                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
-                  {user?.bio ||
-                    "Welcome to Gulf Return! Share your thoughts and connect with others."}
-                </p>
-              )}
+              <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                {user?.bio ||
+                  "Welcome to Gulf Return! Share your thoughts and connect with others."}
+              </p>
             </div>
 
             {/* Location & Join Date */}
