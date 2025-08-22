@@ -1,13 +1,13 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { Loader2, MessageCircle, Send } from "lucide-react";
-import { Button } from "./ui/button";
-import { Textarea } from "./ui/textarea";
-import { Separator } from "./ui/separator";
+import { Button } from "../ui/button";
+import { Textarea } from "../ui/textarea";
+import { Separator } from "../ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { Comment, commentsAPI, getCurrentUser } from "@/lib/api";
-import { CommentItem } from "./ui/comment-item";
+import { CommentItem } from "../ui/comment-item";
 
 interface CommentsListProps {
   postId: string;
@@ -24,6 +24,7 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const loadingRef = useRef(false);
 
   // Get current user
   useEffect(() => {
@@ -41,8 +42,9 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
 
   const loadComments = useCallback(
     async (pageNum = 1, append = false) => {
-      if (loading) return;
+      if (loadingRef.current) return;
 
+      loadingRef.current = true;
       setLoading(true);
       try {
         const response = await commentsAPI.getPostComments(
@@ -52,13 +54,15 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
           "newest"
         );
 
+        const commentsData = response.items || [];
+        
         if (append) {
-          setComments((prev) => [...prev, ...response.data]);
+          setComments((prev) => [...prev, ...commentsData]);
         } else {
-          setComments(response.data);
+          setComments(commentsData);
         }
 
-        setHasMore(response.data.length === 20);
+        setHasMore(commentsData.length === 20);
         setPage(pageNum);
       } catch (error) {
         toast({
@@ -67,10 +71,11 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
           variant: "destructive",
         });
       } finally {
+        loadingRef.current = false;
         setLoading(false);
       }
     },
-    [postId, loading, toast]
+    [postId, toast]
   );
 
   // Load comments when component opens
@@ -129,10 +134,10 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
   );
 
   const loadMoreComments = useCallback(() => {
-    if (hasMore && !loading) {
+    if (hasMore && !loadingRef.current) {
       loadComments(page + 1, true);
     }
-  }, [hasMore, loading, page, loadComments]);
+  }, [hasMore, page, loadComments]);
 
   if (!isOpen) return null;
 

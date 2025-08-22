@@ -7,7 +7,7 @@ import React, {
   useRef,
   useMemo,
 } from "react";
-import { PostCard } from "@/components/post-card";
+import { PostCard as PostCardNew } from "@/components/post-card-new";
 import { FeedSkeleton } from "@/components/ui/loading-skeletons";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, RefreshCw } from "lucide-react";
@@ -162,29 +162,20 @@ export const InfiniteFeed = ({
     );
 
     try {
-      const response = await fetch(`/api/posts/${postId}/like`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
+      const response = await postsAPI.likePost(postId);
 
-      if (!response.ok) {
-        // Revert optimistic update on error
-        setPosts((prevPosts) =>
-          prevPosts.map((post) =>
-            post.id === postId
-              ? {
-                  ...post,
-                  is_liked: !post.is_liked,
-                  like_count: post.is_liked
-                    ? post.like_count + 1
-                    : post.like_count - 1,
-                }
-              : post
-          )
-        );
-      }
+      // Update the actual like data from response
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                is_liked: response.is_liked,
+                like_count: response.like_count,
+              }
+            : post
+        )
+      );
     } catch (error) {
       console.error("Error liking post:", error);
       // Revert optimistic update
@@ -223,6 +214,13 @@ export const InfiniteFeed = ({
           ? { ...post, share_count: post.share_count + 1 }
           : post
       )
+    );
+  }, []);
+
+  // Handle post updates (for likes, comments, etc.)
+  const handlePostUpdate = useCallback((updatedPost: Post) => {
+    setPosts((prevPosts) =>
+      prevPosts.map((post) => (post.id === updatedPost.id ? updatedPost : post))
     );
   }, []);
 
@@ -297,12 +295,7 @@ export const InfiniteFeed = ({
           key={post.id}
           ref={index === posts.length - 1 ? lastPostRef : null}
         >
-          <PostCard
-            post={post}
-            onLike={handleLike}
-            onComment={handleComment}
-            onShare={handleShare}
-          />
+          <PostCardNew post={post} onPostUpdate={handlePostUpdate} />
         </div>
       ))}
 

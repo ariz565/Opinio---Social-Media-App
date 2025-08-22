@@ -78,11 +78,14 @@ api.interceptors.response.use(
 
 // Types
 export interface User {
+  _id: string;
   id: string;
   email: string;
   username: string;
   full_name: string;
+  name: string;
   avatar_url?: string;
+  avatar?: string;
   bio?: string;
   is_verified: boolean;
   is_private: boolean;
@@ -592,6 +595,17 @@ export const postsAPI = {
     return response.data;
   },
 
+  unlikePost: async (
+    postId: string
+  ): Promise<{ message: string; is_liked: boolean; like_count: number }> => {
+    const response: AxiosResponse<{
+      message: string;
+      is_liked: boolean;
+      like_count: number;
+    }> = await api.delete(`/api/v1/posts/${postId}/like`);
+    return response.data;
+  },
+
   // Add Comment
   addComment: async (postId: string, content: string): Promise<Comment> => {
     const response: AxiosResponse<Comment> = await api.post(
@@ -804,6 +818,34 @@ export const commentsAPI = {
   deleteComment: async (commentId: string): Promise<void> => {
     await api.delete(`/api/v1/comments/${commentId}`);
   },
+
+  likeComment: async (commentId: string): Promise<{ message: string; likes: string[] }> => {
+    const response: AxiosResponse<{ message: string; likes: string[] }> = await api.post(
+      `/api/v1/comments/${commentId}/like`
+    );
+    return response.data;
+  },
+
+  unlikeComment: async (commentId: string): Promise<{ message: string; likes: string[] }> => {
+    const response: AxiosResponse<{ message: string; likes: string[] }> = await api.delete(
+      `/api/v1/comments/${commentId}/like`
+    );
+    return response.data;
+  },
+
+  getCommentReplies: async (
+    commentId: string,
+    page: number = 1,
+    limit: number = 5
+  ): Promise<PaginatedResponse<Comment>> => {
+    const response: AxiosResponse<PaginatedResponse<Comment>> = await api.get(
+      `/api/v1/comments/${commentId}/replies`,
+      {
+        params: { page, limit },
+      }
+    );
+    return response.data;
+  },
 };
 
 // Bookmarks API
@@ -932,6 +974,11 @@ export const getToken = (): string | null => {
     return localStorage.getItem("access_token");
   }
   return null;
+};
+
+export const getAuthHeaders = () => {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
 export const isAuthenticated = (): boolean => {
