@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Loader2, MessageCircle, Send } from "lucide-react";
 import { Button } from "../ui/button";
 import { Textarea } from "../ui/textarea";
@@ -13,9 +13,15 @@ interface CommentsListProps {
   postId: string;
   isOpen: boolean;
   onClose?: () => void;
+  onCommentCountChange?: (newCount: number) => void;
 }
 
-export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
+export function CommentsList({
+  postId,
+  isOpen,
+  onClose,
+  onCommentCountChange,
+}: CommentsListProps) {
   const { toast } = useToast();
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
@@ -24,7 +30,6 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
-  const loadingRef = useRef(false);
 
   // Get current user
   useEffect(() => {
@@ -40,30 +45,25 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
     loadCurrentUser();
   }, []);
 
-  const loadComments = useCallback(
-    async (pageNum = 1, append = false) => {
-      if (loadingRef.current) return;
+  // Load comments when component opens
+  useEffect(() => {
+    if (!isOpen || !postId || loading) return;
 
-      loadingRef.current = true;
+    const fetchComments = async () => {
       setLoading(true);
       try {
         const response = await commentsAPI.getPostComments(
           postId,
-          pageNum,
+          1,
           20,
           "newest"
         );
 
         const commentsData = response.items || [];
-        
-        if (append) {
-          setComments((prev) => [...prev, ...commentsData]);
-        } else {
-          setComments(commentsData);
-        }
-
+        setComments(commentsData);
+        onCommentCountChange?.(commentsData.length);
         setHasMore(commentsData.length === 20);
-        setPage(pageNum);
+        setPage(1);
       } catch (error) {
         toast({
           title: "Error",
@@ -71,19 +71,44 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
           variant: "destructive",
         });
       } finally {
-        loadingRef.current = false;
         setLoading(false);
       }
-    },
-    [postId, toast]
-  );
+    };
 
-  // Load comments when component opens
-  useEffect(() => {
-    if (isOpen && postId) {
-      loadComments();
+    fetchComments();
+  }, [isOpen, postId, toast, onCommentCountChange]);
+
+  const loadMoreComments = useCallback(async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+    try {
+      const response = await commentsAPI.getPostComments(
+        postId,
+        page + 1,
+        20,
+        "newest"
+      );
+
+      const commentsData = response.items || [];
+      setComments((prev) => {
+        const newComments = [...prev, ...commentsData];
+        onCommentCountChange?.(newComments.length);
+        return newComments;
+      });
+
+      setHasMore(commentsData.length === 20);
+      setPage((prev) => prev + 1);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to load more comments. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-  }, [isOpen, postId, loadComments]);
+  }, [postId, page, loading, hasMore, toast, onCommentCountChange]);
 
   const handleAddComment = useCallback(async () => {
     if (!commentText.trim()) return;
@@ -95,7 +120,12 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
       });
 
       // Add the new comment to the top of the list
-      setComments((prev) => [newComment, ...prev]);
+      setComments((prev) => {
+        const newComments = [newComment, ...prev];
+        // Notify parent about the new comment count
+        onCommentCountChange?.(newComments.length);
+        return newComments;
+      });
       setCommentText("");
 
       toast({
@@ -111,7 +141,7 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
     } finally {
       setIsCommenting(false);
     }
-  }, [commentText, postId, toast]);
+  }, [commentText, postId, toast, onCommentCountChange]);
 
   const handleCommentUpdate = useCallback((updatedComment: Comment) => {
     setComments((prev) =>
@@ -121,23 +151,31 @@ export function CommentsList({ postId, isOpen, onClose }: CommentsListProps) {
     );
   }, []);
 
-  const handleCommentDelete = useCallback((commentId: string) => {
-    setComments((prev) => prev.filter((comment) => comment.id !== commentId));
-  }, []);
+  const handleCommentDelete = useCallback(
+    (commentId: string) => {
+      setComments((prev) => {
+        const newComments = prev.filter((comment) => comment.id !== commentId);
+        // Notify parent about the new comment count
+        onCommentCountChange?.(newComments.length);
+        return newComments;
+      });
+    },
+    [onCommentCountChange]
+  );
 
   const handleReply = useCallback(
     (parentId: string, content: string) => {
-      // Refresh comments to show the new reply
+      // Refresh comments to show the new reply and update count
       loadComments(1, false);
     },
     [loadComments]
   );
 
   const loadMoreComments = useCallback(() => {
-    if (hasMore && !loadingRef.current) {
+    if (hasMore && !loading) {
       loadComments(page + 1, true);
     }
-  }, [hasMore, page, loadComments]);
+  }, [hasMore, loading, page, loadComments]);
 
   if (!isOpen) return null;
 

@@ -606,6 +606,22 @@ export const postsAPI = {
     return response.data;
   },
 
+  // Get Like Status
+  getLikeStatus: async (
+    postId: string
+  ): Promise<{
+    is_liked: boolean;
+    like_count: number;
+    total_reactions: number;
+  }> => {
+    const response: AxiosResponse<{
+      is_liked: boolean;
+      like_count: number;
+      total_reactions: number;
+    }> = await api.get(`/api/v1/posts/${postId}/like-status`);
+    return response.data;
+  },
+
   // Add Comment
   addComment: async (postId: string, content: string): Promise<Comment> => {
     const response: AxiosResponse<Comment> = await api.post(
@@ -819,17 +835,19 @@ export const commentsAPI = {
     await api.delete(`/api/v1/comments/${commentId}`);
   },
 
-  likeComment: async (commentId: string): Promise<{ message: string; likes: string[] }> => {
-    const response: AxiosResponse<{ message: string; likes: string[] }> = await api.post(
-      `/api/v1/comments/${commentId}/like`
-    );
+  likeComment: async (
+    commentId: string
+  ): Promise<{ message: string; likes: string[] }> => {
+    const response: AxiosResponse<{ message: string; likes: string[] }> =
+      await api.post(`/api/v1/comments/${commentId}/like`);
     return response.data;
   },
 
-  unlikeComment: async (commentId: string): Promise<{ message: string; likes: string[] }> => {
-    const response: AxiosResponse<{ message: string; likes: string[] }> = await api.delete(
-      `/api/v1/comments/${commentId}/like`
-    );
+  unlikeComment: async (
+    commentId: string
+  ): Promise<{ message: string; likes: string[] }> => {
+    const response: AxiosResponse<{ message: string; likes: string[] }> =
+      await api.delete(`/api/v1/comments/${commentId}/like`);
     return response.data;
   },
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { formatDistanceToNow } from "date-fns";
 import Image from "next/image";
 import {
@@ -21,7 +21,7 @@ import { Separator } from "./ui/separator";
 import { Badge } from "./ui/badge";
 import { LazyImage } from "./ui/lazy-image";
 import { ImageViewer } from "./ui/image-viewer";
-import { CommentsList } from "./comments/comments-list";
+import { CommentsList } from "./comments/comments-list-new";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import { useToast } from "@/hooks/use-toast";
-import { type Post, reactionsAPI, commentsAPI } from "@/lib/api";
+import { type Post, reactionsAPI, commentsAPI, postsAPI } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 interface PostCardProps {
@@ -41,11 +41,34 @@ export function PostCard({ post, onPostUpdate }: PostCardProps) {
   const { toast } = useToast();
   const [isLiked, setIsLiked] = useState(post.is_liked || false);
   const [likesCount, setLikesCount] = useState(post.like_count || 0);
+  const [commentsCount, setCommentsCount] = useState(post.comment_count || 0);
   const [showComments, setShowComments] = useState(false);
   const [isBookmarked, setIsBookmarked] = useState(false);
   const [isExpanded, setIsExpanded] = useState(false);
   const [imageViewerOpen, setImageViewerOpen] = useState(false);
   const [imageViewerIndex, setImageViewerIndex] = useState(0);
+
+  // Load initial like status
+  useEffect(() => {
+    const loadLikeStatus = async () => {
+      try {
+        // Get user's like status and current count for this post
+        const status = await postsAPI.getLikeStatus(post.id);
+        setIsLiked(status.is_liked);
+        setLikesCount(status.like_count);
+      } catch (error) {
+        console.error("Failed to load like status:", error);
+        // Fallback to post data
+        setLikesCount(post.like_count || 0);
+      }
+    };
+
+    loadLikeStatus();
+  }, [post.id, post.like_count]);
+
+  const handleCommentCountChange = useCallback((newCount: number) => {
+    setCommentsCount(newCount);
+  }, []);
 
   const formatTimeAgo = useCallback((dateString: string) => {
     try {
@@ -81,12 +104,18 @@ export function PostCard({ post, onPostUpdate }: PostCardProps) {
       setIsLiked(optimisticLiked);
       setLikesCount(optimisticCount);
 
+      let response;
       if (optimisticLiked) {
-        await reactionsAPI.addReaction("posts", post.id, "like");
+        response = await postsAPI.likePost(post.id);
       } else {
-        await reactionsAPI.removeReaction("posts", post.id, "like");
+        response = await postsAPI.unlikePost(post.id);
       }
+
+      // Update with actual values from backend
+      setIsLiked(response.is_liked);
+      setLikesCount(response.like_count);
     } catch (error) {
+      // Revert optimistic updates on error
       setIsLiked(!isLiked);
       setLikesCount(likesCount);
 
@@ -389,65 +418,36 @@ export function PostCard({ post, onPostUpdate }: PostCardProps) {
           </div>
         )}
 
-        {/* Engagement Stats */}
-        <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 pt-2">
+        {/* Action Buttons - Instagram Style */}
+        <div className="flex items-center justify-between py-2">
           <div className="flex items-center gap-4">
-            {likesCount > 0 && (
-              <span className="flex items-center gap-1">
-                <ThumbsUp className="h-4 w-4 text-blue-500" />
-                {likesCount}
-              </span>
-            )}
-            {(post.comment_count || 0) > 0 && (
-              <span>
-                {post.comment_count} comment
-                {post.comment_count !== 1 ? "s" : ""}
-              </span>
-            )}
-          </div>
-
-          {(post.share_count || 0) > 0 && (
-            <span>
-              {post.share_count} share{post.share_count !== 1 ? "s" : ""}
-            </span>
-          )}
-        </div>
-
-        <Separator className="bg-gray-200 dark:bg-gray-700" />
-
-        {/* Action Buttons */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-1">
             <Button
               variant="ghost"
               size="sm"
               onClick={handleLike}
               className={cn(
-                "flex items-center gap-2 rounded-xl transition-all duration-200 hover:bg-red-50 dark:hover:bg-red-900/20",
-                isLiked && "text-red-500 bg-red-50 dark:bg-red-900/20"
+                "p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200",
+                isLiked && "text-red-500"
               )}
             >
-              <Heart className={cn("h-5 w-5", isLiked && "fill-current")} />
-              <span className="font-medium">{likesCount || "Like"}</span>
+              <Heart className={cn("h-6 w-6", isLiked && "fill-current")} />
             </Button>
 
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setShowComments(!showComments)}
-              className="flex items-center gap-2 rounded-xl hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
             >
-              <MessageCircle className="h-5 w-5" />
-              <span className="font-medium">Comment</span>
+              <MessageCircle className="h-6 w-6" />
             </Button>
 
             <Button
               variant="ghost"
               size="sm"
-              className="flex items-center gap-2 rounded-xl hover:bg-green-50 dark:hover:bg-green-900/20 transition-all duration-200"
+              className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
             >
-              <Share2 className="h-5 w-5" />
-              <span className="font-medium">Share</span>
+              <Share2 className="h-6 w-6" />
             </Button>
           </div>
 
@@ -455,16 +455,38 @@ export function PostCard({ post, onPostUpdate }: PostCardProps) {
             variant="ghost"
             size="sm"
             onClick={() => setIsBookmarked(!isBookmarked)}
-            className={cn(
-              "rounded-xl transition-all duration-200 hover:bg-yellow-50 dark:hover:bg-yellow-900/20",
-              isBookmarked &&
-                "text-yellow-600 bg-yellow-50 dark:bg-yellow-900/20"
-            )}
+            className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200"
           >
             <Bookmark
-              className={cn("h-5 w-5", isBookmarked && "fill-current")}
+              className={cn("h-6 w-6", isBookmarked && "fill-current")}
             />
           </Button>
+        </div>
+
+        {/* Engagement Stats - Instagram Style */}
+        <div className="space-y-2">
+          {likesCount > 0 && (
+            <div className="text-sm font-semibold text-gray-900 dark:text-white">
+              {likesCount.toLocaleString()}{" "}
+              {likesCount === 1 ? "like" : "likes"}
+            </div>
+          )}
+
+          {commentsCount > 0 && (
+            <button
+              onClick={() => setShowComments(!showComments)}
+              className="text-sm text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300 transition-colors"
+            >
+              View{" "}
+              {commentsCount === 1
+                ? "comment"
+                : `all ${commentsCount.toLocaleString()} comments`}
+            </button>
+          )}
+
+          <div className="text-xs text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+            {formatTimeAgo(post.created_at)}
+          </div>
         </div>
 
         {/* Comments Section */}
@@ -473,6 +495,7 @@ export function PostCard({ post, onPostUpdate }: PostCardProps) {
             postId={post.id}
             isOpen={showComments}
             onClose={() => setShowComments(false)}
+            onCommentCountChange={handleCommentCountChange}
           />
         )}
       </CardContent>
