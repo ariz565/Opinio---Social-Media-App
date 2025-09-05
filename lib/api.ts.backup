@@ -1138,4 +1138,139 @@ export const isAuthenticated = (): boolean => {
   return !!getToken();
 };
 
+// Profile API endpoints
+export const profileAPI = {
+  // Get user profile
+  getProfile: async (username: string): Promise<any> => {
+    const response = await api.get(`/api/v1/profile/${username}`);
+    return response.data;
+  },
+
+  // Update basic info
+  updateBasicInfo: async (data: {
+    full_name?: string;
+    bio?: string;
+    location?: string;
+    website?: string;
+    phone?: string;
+  }): Promise<any> => {
+    const response = await api.put("/api/v1/profile/basic-info", data);
+    return response.data;
+  },
+
+  // Experience endpoints
+  updateExperience: async (experience: any[]): Promise<any> => {
+    const response = await api.put("/api/v1/profile/experience", {
+      experience,
+    });
+    return response.data;
+  },
+
+  addExperience: async (experience: any): Promise<any> => {
+    const response = await api.post("/api/v1/profile/experience", experience);
+    return response.data;
+  },
+
+  deleteExperience: async (itemId: string): Promise<any> => {
+    const response = await api.delete(`/api/v1/profile/experience/${itemId}`);
+    return response.data;
+  },
+
+  // Education endpoints
+  updateEducation: async (education: any[]): Promise<any> => {
+    const response = await api.put("/api/v1/profile/education", { education });
+    return response.data;
+  },
+
+  addEducation: async (education: any): Promise<any> => {
+    const response = await api.post("/api/v1/profile/education", education);
+    return response.data;
+  },
+
+  deleteEducation: async (itemId: string): Promise<any> => {
+    const response = await api.delete(`/api/v1/profile/education/${itemId}`);
+    return response.data;
+  },
+
+  // Skills endpoints
+  updateSkills: async (skills: any[]): Promise<any> => {
+    const response = await api.put("/api/v1/profile/skills", { skills });
+    return response.data;
+  },
+
+  // Languages endpoints
+  updateLanguages: async (languages: any[]): Promise<any> => {
+    const response = await api.put("/api/v1/profile/languages", { languages });
+    return response.data;
+  },
+
+  // Certifications endpoints
+  updateCertifications: async (certifications: any[]): Promise<any> => {
+    const response = await api.put("/api/v1/profile/certifications", {
+      certifications,
+    });
+    return response.data;
+  },
+
+  addCertification: async (certification: any): Promise<any> => {
+    const response = await api.post(
+      "/api/v1/profile/certifications",
+      certification
+    );
+    return response.data;
+  },
+
+  deleteCertification: async (itemId: string): Promise<any> => {
+    const response = await api.delete(
+      `/api/v1/profile/certifications/${itemId}`
+    );
+    return response.data;
+  },
+
+  // Interests endpoints
+  updateInterests: async (interests: string[]): Promise<any> => {
+    const response = await api.put("/api/v1/profile/interests", { interests });
+    return response.data;
+  },
+
+  // Social links endpoints
+  updateSocialLinks: async (social_links: any): Promise<any> => {
+    const response = await api.put("/api/v1/profile/social-links", {
+      social_links,
+    });
+    return response.data;
+  },
+
+  // Photo upload endpoints
+  uploadProfilePhoto: async (file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post(
+      "/api/v1/profile/upload/profile-photo",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+
+  uploadCoverPhoto: async (file: File): Promise<any> => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post(
+      "/api/v1/profile/upload/cover-photo",
+      formData,
+      {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }
+    );
+    return response.data;
+  },
+};
+
 export default api;
