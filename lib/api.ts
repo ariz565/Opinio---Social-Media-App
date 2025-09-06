@@ -976,6 +976,78 @@ export const usersAPI = {
     );
     return response.data;
   },
+
+  // Get friend suggestions (can be used as a user list)
+  getFriendSuggestions: async (limit: number = 20): Promise<User[]> => {
+    const response: AxiosResponse<User[]> = await api.get(
+      "/api/v1/suggestions/friends",
+      {
+        params: { limit },
+      }
+    );
+    return response.data;
+  },
+
+  // Get connection suggestions - alternative source for user lists
+  getConnectionSuggestions: async (limit: number = 10): Promise<User[]> => {
+    const response: AxiosResponse<{ suggestions: User[]; total: number }> =
+      await api.get("/api/v1/connections/suggestions", {
+        params: { limit },
+      });
+    return response.data.suggestions || [];
+  },
+
+  // Get trending users by getting followers from trending posts
+  getTrendingUsers: async (limit: number = 20): Promise<User[]> => {
+    try {
+      // Get trending posts first
+      const trendingPosts = await postsAPI.getTrendingPosts(1, limit);
+
+      // Extract unique users from trending posts
+      const userMap = new Map<string, User>();
+
+      if (trendingPosts.posts) {
+        trendingPosts.posts.forEach((post) => {
+          if (post.author && post.author.id) {
+            userMap.set(post.author.id, {
+              _id: post.author.id,
+              id: post.author.id,
+              email: post.author.email || "",
+              username: post.author.username,
+              full_name: post.author.full_name,
+              name: post.author.full_name,
+              avatar_url: post.author.avatar_url,
+              bio: "",
+              is_verified: false,
+              is_private: false,
+              followers_count: 0,
+              following_count: 0,
+              posts_count: 0,
+            });
+          }
+        });
+      }
+
+      return Array.from(userMap.values()).slice(0, limit);
+    } catch (error) {
+      console.error("Error getting trending users:", error);
+      return [];
+    }
+  },
+
+  // Get current user's followers as a user source
+  getMyFollowers: async (limit: number = 20): Promise<User[]> => {
+    try {
+      const currentUser = JSON.parse(localStorage.getItem("user") || "{}");
+      if (!currentUser.id) return [];
+
+      const response = await followsAPI.getFollowers(currentUser.id, 1, limit);
+      return response.items || [];
+    } catch (error) {
+      console.error("Error getting my followers:", error);
+      return [];
+    }
+  },
 };
 
 // Utility functions
